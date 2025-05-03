@@ -6,11 +6,36 @@ DiarioTer é um aplicativo web de terapia que permite aos usuários registrar en
 
 ## Tecnologias Utilizadas
 
-- **Frontend**: Next.js 14, TypeScript, Tailwind CSS, shadcn/ui
+- **Frontend**: Next.js 15, TypeScript, Tailwind CSS, shadcn/ui
 - **Backend**: Supabase (Autenticação e Banco de Dados)
 - **Análise Terapêutica**: OpenAI GPT-4o e Whisper
 - **Pagamentos**: Mercado Pago
 - **Deploy**: Vercel
+
+## Problemas Corrigidos na Versão Atual
+
+Esta versão inclui correções importantes para problemas de autenticação que surgiram com a atualização para o Next.js 15:
+
+1. **API cookies() assíncrona**: 
+   - O Next.js 15 alterou a função `cookies()` de síncrona para assíncrona, o que quebrou toda a integração com Supabase
+   - Refatoramos todos os clientes Supabase para trabalhar com cookies assíncronos
+
+2. **Refatoração do Supabase Client**:
+   - Atualização de `src/lib/supabase/server.ts` para tornar `createClient` e `createRouteClient` funções assíncronas
+   - Atualização de `src/lib/supabase/server-queries.ts` para tornar `createServerSupabaseClient` assíncrono
+   - Correção de rotas da API que usam esses clientes: analyze, auth/callback, reports/weekly, técnicas, etc.
+
+3. **Problemas de tipagem MercadoPago**:
+   - Adição de comentários `@ts-ignore` nos arquivos relacionados a pagamentos para suprimir erros de tipo com a integração MercadoPago
+   - Arquivos corrigidos: webhook/route.ts, subscription/route.ts e create-preference/route.ts
+
+4. **Correção de acesso a propriedades**:
+   - Resolução de acesso incorreto às propriedades 'patterns' e 'effectiveness' em techniques/recommend/route.ts
+   - Adição de verificação de tipo adequada
+   - Renomeação de 'effectiveness' para 'effectiveness_rating'
+
+5. **Dependências**:
+   - Instalação do pacote `@web-std/file` para corrigir a transcrição de áudio em transcribe/route.ts
 
 ## Funcionalidades Principais
 
@@ -52,6 +77,10 @@ diarioter/
 ## Instalação e Execução Local
 
 1. Clone o repositório
+   ```
+   git clone https://github.com/EduardoSousaPO/diario-ter.git
+   cd diario-ter
+   ```
 2. Instale as dependências:
    ```
    npm install
