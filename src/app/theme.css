@@ -1,0 +1,221 @@
+/* Arquivo de tema para o DiarioTer */
+
+:root {
+  /* Paleta de Cores Principal */
+  --primary: #186FAF;
+  --primary-light: #3A97D4;
+  --accent: #A38AFF;
+  --success: #4ECDC4;
+  
+  /* Paleta Neutra */
+  --background: #FFFFFF;
+  --background-secondary: #F5F7FA;
+  --border: #E2E8F0;
+  --text-secondary: #64748B;
+  --text-primary: #18181B;
+  
+  /* Estados */
+  --error: #FF6B6B;
+  --warning: #FFD166;
+  --info: #3A97D4;
+  
+  /* Sombras */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  
+  /* Arredondamento */
+  --radius-sm: 0.25rem;
+  --radius: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-full: 9999px;
+  
+  /* Espaçamento */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  
+  /* Transições */
+  --transition-fast: 150ms;
+  --transition: 300ms;
+  --transition-slow: 500ms;
+}
+
+/* Modo escuro */
+.dark {
+  --primary: #3A97D4;
+  --primary-light: #186FAF;
+  --accent: #A38AFF;
+  --success: #4ECDC4;
+  
+  --background: #18181B;
+  --background-secondary: #27272A;
+  --border: #3F3F46;
+  --text-secondary: #A1A1AA;
+  --text-primary: #F5F7FA;
+}
+
+/* Estilos base */
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--text-primary);
+  background-color: var(--background);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+/* Tipografia */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+}
+
+h3 {
+  font-size: 1.25rem;
+}
+
+p {
+  line-height: 1.6;
+}
+
+/* Botões */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  padding: var(--spacing-2) var(--spacing-4);
+  font-weight: 500;
+  transition: all var(--transition);
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-light);
+}
+
+.btn-secondary {
+  background-color: var(--background-secondary);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+  background-color: var(--border);
+}
+
+.btn-accent {
+  background-color: var(--accent);
+  color: white;
+}
+
+.btn-accent:hover {
+  opacity: 0.9;
+}
+
+/* Cards */
+.card {
+  background-color: var(--background);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--spacing-4);
+  transition: box-shadow var(--transition);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Inputs */
+.input {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--background);
+  color: var(--text-primary);
+  transition: border-color var(--transition);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(24, 111, 175, 0.2);
+}
+
+/* Animações */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn var(--transition) ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Utilitários */
+.text-primary {
+  color: var(--primary);
+}
+
+.text-accent {
+  color: var(--accent);
+}
+
+.text-success {
+  color: var(--success);
+}
+
+.text-error {
+  color: var(--error);
+}
+
+.bg-primary {
+  background-color: var(--primary);
+}
+
+.bg-accent {
+  background-color: var(--accent);
+}
+
+.bg-success {
+  background-color: var(--success);
+}
+
+.bg-error {
+  background-color: var(--error);
+}
