@@ -1,209 +1,257 @@
 'use client'
 
-import React from 'react'
-import { DiarioTerLogo } from '@/components/ui/logo'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { createClientSupabaseClient } from '@/lib/supabase/client-queries'
 import { usePathname } from 'next/navigation'
-import { UserButton } from '@clerk/nextjs'
-import { 
-  JournalIcon, 
-  CheckInIcon, 
-  ReportIcon, 
-  AudioIcon, 
-  TherapistIcon 
-} from '@/components/ui/illustrations'
+import { EquilibriLogo } from '@/components/ui/logo'
 
-interface SidebarProps {
+export default function AppLayout({
+  children,
+}: {
   children: React.ReactNode
-}
-
-export default function DashboardLayout({ children }: SidebarProps) {
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [user, setUser] = useState<any>(null)
+  const [profile, setProfile] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
   const pathname = usePathname()
-  
-  const menuItems = [
-    {
-      name: 'Diário',
-      href: '/app/journal',
-      icon: JournalIcon
-    },
-    {
-      name: 'Check-in',
-      href: '/app/checkin',
-      icon: CheckInIcon
-    },
-    {
-      name: 'Áudio',
-      href: '/app/audio',
-      icon: AudioIcon
-    },
-    {
-      name: 'Relatórios',
-      href: '/app/reports',
-      icon: ReportIcon
-    },
-    {
-      name: 'Técnicas',
-      href: '/app/techniques',
-      icon: TherapistIcon
+
+  useEffect(() => {
+    const getUser = async () => {
+      setLoading(true)
+      const supabase = createClientSupabaseClient()
+      const { data: { user }, error } = await supabase.auth.getUser()
+      if (error || !user) {
+        setLoading(false)
+        window.location.href = '/login'
+        return
+      }
+      
+      setUser(user)
+      
+      // Buscar perfil do usuário
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+      
+      setProfile(profile)
+      setLoading(false)
     }
+    
+    getUser()
+  }, [])
+
+  const handleSignOut = async () => {
+    const supabase = createClientSupabaseClient()
+    await supabase.auth.signOut()
+    window.location.href = '/'
+  }
+
+  const isActive = (path: string) => {
+    return pathname === path || pathname?.startsWith(path + '/')
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-l-2 border-primary"></div>
+      </div>
+    )
+  }
+
+  const navItems = [
+    { label: 'Dashboard', path: '/app/dashboard', icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+      </svg>
+    )},
+    { label: 'Diário', path: '/app/journal', icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+      </svg>
+    )},
+    { label: 'Check-in', path: '/app/checkin', icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    )},
+    { label: 'Áudio', path: '/app/audio', icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+      </svg>
+    )},
+    { label: 'Técnicas', path: '/app/techniques', icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+    )},
+    { label: 'Relatórios', path: '/app/reports', icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    )},
+    { label: 'Configurações', path: '/app/settings', icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    )}
   ]
-  
+
   return (
-    <div className="flex h-screen bg-background-secondary">
-      {/* Sidebar para desktop */}
-      <aside className="hidden md:flex flex-col w-64 bg-background border-r border-border">
-        <div className="p-4 border-b border-border">
-          <Link href="/app/dashboard">
-            <div className="flex items-center justify-center">
-              <DiarioTerLogo />
-            </div>
+    <div className="min-h-screen bg-background flex">
+      {/* Sidebar - Desktop */}
+      <aside className="hidden lg:flex flex-col w-60 bg-background border-r border-border">
+        {/* Logo */}
+        <div className="px-7 py-8 flex items-center justify-center">
+          <Link href="/app/dashboard" className="block w-full">
+            <EquilibriLogo className="h-12 w-auto mx-auto hover-lift transition-transform" />
           </Link>
         </div>
         
-        <nav className="flex-1 p-4 space-y-1">
-          {menuItems.map((item) => {
-            const isActive = pathname.startsWith(item.href)
-            
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`flex items-center px-4 py-3 rounded-md transition-colors ${
-                  isActive 
-                    ? 'bg-primary text-white' 
-                    : 'text-text-secondary hover:bg-background-secondary hover:text-text-primary'
-                }`}
-              >
-                <span className="mr-3">
-                  <item.icon />
-                </span>
-                <span className="font-medium">{item.name}</span>
-              </Link>
-            )
-          })}
-        </nav>
-        
-        <div className="p-4 border-t border-border">
-          <Link
-            href="/app/settings"
-            className={`flex items-center px-4 py-3 rounded-md transition-colors ${
-              pathname.startsWith('/app/settings') 
-                ? 'bg-primary text-white' 
-                : 'text-text-secondary hover:bg-background-secondary hover:text-text-primary'
-            }`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <span className="font-medium">Configurações</span>
-          </Link>
+        {/* Menu de Navegação */}
+        <nav className="flex-1 pt-2 pb-8 overflow-y-auto px-4">
+          <div className="divider mb-4 opacity-60"></div>
+          <ul className="space-y-1">
+            {navItems.map((item) => (
+              <li key={item.path}>
+                <Link
+                  href={item.path}
+                  className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-all duration-300 ${
+                    isActive(item.path)
+                      ? 'bg-primary-ultra-light text-primary'
+                      : 'text-text-primary hover:bg-background-secondary'
+                  }`}
+                >
+                  <span className={`mr-3 transition-colors duration-300 ${isActive(item.path) ? 'text-primary' : 'text-text-secondary'}`}>
+                    {item.icon}
+                  </span>
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
           
-          <div className="mt-2 px-4 py-3">
-            <UserButton 
-              afterSignOutUrl="/"
-              appearance={{
-                elements: {
-                  userButtonAvatarBox: "h-8 w-8",
-                  userButtonBox: "flex items-center w-full"
-                }
-              }}
-            />
+          {/* Perfil do usuário */}
+          <div className="mt-8 pt-6 border-t border-border">
+            <div className="flex items-center px-4 py-3">
+              <div className="h-8 w-8 rounded-full bg-primary text-background flex items-center justify-center text-sm font-medium">
+                {profile?.full_name ? profile.full_name.charAt(0).toUpperCase() : 'U'}
+              </div>
+              <div className="ml-3 overflow-hidden">
+                <p className="text-sm font-medium text-text-primary truncate">
+                  {profile?.full_name || user?.email || 'Usuário'}
+                </p>
+                <button
+                  onClick={handleSignOut}
+                  className="text-xs text-text-secondary hover:text-primary transition-colors duration-300"
+                >
+                  Sair
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        </nav>
       </aside>
       
-      {/* Conteúdo principal */}
-      <main className="flex-1 flex flex-col overflow-hidden">
-        {/* Barra superior para mobile */}
-        <header className="md:hidden flex items-center justify-between p-4 bg-background border-b border-border">
+      {/* Cabeçalho móvel e Menu */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-20 bg-background border-b border-border py-2.5 px-4">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
           <Link href="/app/dashboard">
-            <div className="flex items-center">
-              <DiarioTerLogo />
-            </div>
+            <EquilibriLogo className="h-8 w-auto" />
           </Link>
           
-          <div className="flex items-center space-x-2">
-            <UserButton 
-              afterSignOutUrl="/"
-              appearance={{
-                elements: {
-                  userButtonAvatarBox: "h-8 w-8"
-                }
-              }}
-            />
-            <button
-              type="button"
-              className="p-2 rounded-md text-text-secondary hover:bg-background-secondary hover:text-text-primary transition-colors"
-              onClick={() => {
-                const mobileMenu = document.getElementById('mobile-menu')
-                if (mobileMenu) {
-                  mobileMenu.classList.toggle('hidden')
-                }
-              }}
-            >
+          {/* Botão menu hambúrguer */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="text-text-primary hover:text-primary transition-colors duration-300"
+            aria-label="Abrir menu"
+          >
+            {isOpen ? (
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
               </svg>
-            </button>
-          </div>
-        </header>
-        
-        {/* Menu mobile */}
-        <div id="mobile-menu" className="hidden md:hidden bg-background border-b border-border">
-          <nav className="p-4 space-y-1">
-            {menuItems.map((item) => {
-              const isActive = pathname.startsWith(item.href)
-              
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`flex items-center px-4 py-3 rounded-md transition-colors ${
-                    isActive 
-                      ? 'bg-primary text-white' 
-                      : 'text-text-secondary hover:bg-background-secondary hover:text-text-primary'
-                  }`}
-                  onClick={() => {
-                    const mobileMenu = document.getElementById('mobile-menu')
-                    if (mobileMenu) {
-                      mobileMenu.classList.add('hidden')
-                    }
-                  }}
-                >
-                  <span className="mr-3">
-                    <item.icon />
-                  </span>
-                  <span className="font-medium">{item.name}</span>
-                </Link>
-              )
-            })}
-            
-            <Link
-              href="/app/settings"
-              className={`flex items-center px-4 py-3 rounded-md transition-colors ${
-                pathname.startsWith('/app/settings') 
-                  ? 'bg-primary text-white' 
-                  : 'text-text-secondary hover:bg-background-secondary hover:text-text-primary'
-              }`}
-              onClick={() => {
-                const mobileMenu = document.getElementById('mobile-menu')
-                if (mobileMenu) {
-                  mobileMenu.classList.add('hidden')
-                }
-              }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
-              <span className="font-medium">Configurações</span>
-            </Link>
-          </nav>
+            )}
+          </button>
         </div>
-        
-        {/* Conteúdo da página */}
-        <div className="flex-1 overflow-auto p-4 md:p-8">
+      </div>
+      
+      {/* Menu Mobile */}
+      {isOpen && (
+        <div className="lg:hidden fixed inset-0 z-10 bg-primary/10 backdrop-blur-sm transition-opacity duration-300">
+          <div className="fixed right-0 top-0 bottom-0 w-64 bg-background shadow-xl transition-transform duration-300 ease-in-out overflow-y-auto">
+            <div className="p-5">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-medium text-text-primary">Menu</h2>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="text-text-primary hover:text-primary transition-colors duration-300"
+                  aria-label="Fechar menu"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="divider mb-2 opacity-60"></div>
+              
+              <nav className="space-y-1">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.path}
+                    href={item.path}
+                    className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-all duration-300 ${
+                      isActive(item.path)
+                        ? 'bg-primary-ultra-light text-primary'
+                        : 'text-text-primary hover:bg-background-secondary'
+                    }`}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <span className={`mr-3 transition-colors duration-300 ${isActive(item.path) ? 'text-primary' : 'text-text-secondary'}`}>
+                      {item.icon}
+                    </span>
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+              
+              <div className="divider my-4 opacity-60"></div>
+              
+              <div className="pt-2">
+                <div className="flex items-center py-2">
+                  <div className="h-8 w-8 rounded-full bg-primary text-background flex items-center justify-center text-sm font-medium">
+                    {profile?.full_name ? profile.full_name.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                  <div className="ml-3 overflow-hidden">
+                    <p className="text-sm font-medium text-text-primary truncate">
+                      {profile?.full_name || user?.email || 'Usuário'}
+                    </p>
+                    <button
+                      onClick={handleSignOut}
+                      className="text-xs text-text-secondary hover:text-primary transition-colors duration-300"
+                    >
+                      Sair
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Conteúdo principal */}
+      <main className="flex-1 overflow-y-auto lg:pt-0 pt-14 bg-background">
+        <div className="max-w-6xl mx-auto p-4 md:p-6 fade-in">
           {children}
         </div>
       </main>

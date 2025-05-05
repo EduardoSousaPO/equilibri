@@ -61,7 +61,7 @@ export default function PaymentSuccessPage() {
             {profile?.subscription_tier === 'premium' ? (
               <>
                 <p className="text-text-secondary mb-6">
-                  Seu upgrade para o plano Premium foi concluído com sucesso. Agora você tem acesso a todos os recursos do DiarioTer!
+                  Seu upgrade para o plano Premium foi concluído com sucesso. Agora você tem acesso a todos os recursos do Equilibri!
                 </p>
                 
                 <div className="bg-background-secondary rounded-lg p-4 mb-6">

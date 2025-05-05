@@ -1,87 +1,49 @@
 'use client'
 
-import { useState } from 'react'
-import { useSignUp } from '@clerk/nextjs'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function VerifyPage() {
-  const [verificationCode, setVerificationCode] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const { isLoaded, signUp, setActive } = useSignUp()
-  const router = useRouter()
-
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-    
-    if (!isLoaded) {
-      return
-    }
-
-    try {
-      const completeSignUp = await signUp.attemptEmailAddressVerification({
-        code: verificationCode,
-      })
-      
-      if (completeSignUp.status === 'complete') {
-        // Definir sessão como ativa
-        await setActive({ session: completeSignUp.createdSessionId })
-        router.push('/app/dashboard')
-      } else {
-        throw new Error('Falha na verificação')
-      }
-    } catch (err: any) {
-      setError(err.message || 'Erro ao verificar código')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4 py-8">
-      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-md">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-gray-50">
+      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-slate-900">Verificar E-mail</h1>
-          <p className="mt-2 text-sm text-slate-600">Digite o código que enviamos para o seu e-mail</p>
+          <h1 className="text-2xl font-bold text-gray-900">Verifique seu Email</h1>
+          <div className="mt-4 text-gray-600">
+            <p className="mb-2">Enviamos um link de verificação para o seu email.</p>
+            <p>Por favor, acesse seu email e clique no link de verificação para ativar sua conta.</p>
+          </div>
         </div>
         
-        {error && (
-          <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-        
-        <form onSubmit={handleVerify} className="mt-8 space-y-6">
-          <div className="space-y-4 rounded-md">
-            <div>
-              <label htmlFor="code" className="block text-sm font-medium text-slate-700">
-                Código de Verificação
-              </label>
-              <input
-                id="code"
-                name="code"
-                type="text"
-                required
-                value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-                placeholder="Digite o código"
+        <div className="mt-8 space-y-4">
+          <div className="bg-blue-50 p-4 rounded-md flex items-start">
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-6 w-6 text-blue-600 mt-0.5 mr-3" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
               />
+            </svg>
+            <div className="text-sm text-blue-800">
+              <p>Se você não receber o email em alguns minutos, verifique sua pasta de spam ou lixo eletrônico.</p>
             </div>
           </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading || !isLoaded}
-              className="group relative flex w-full justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70"
+          <div className="pt-4 text-center">
+            <Link 
+              href="/login" 
+              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
             >
-              {loading ? 'Verificando...' : 'Verificar'}
-            </button>
+              Voltar para o login
+            </Link>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   )

@@ -44,16 +44,18 @@ export async function POST(request: NextRequest) {
     const preference = {
       items: [
         {
-          title: preference_data.title || 'Assinatura Premium DiarioTer - 1 mês',
-          unit_price: preference_data.price || 29.90,
+          id: preference_data.id || 'premium_monthly',
+          title: preference_data.title || 'Assinatura Premium Equilibri - 1 mês',
           quantity: 1,
-          currency_id: 'BRL'
+          unit_price: preference_data.price || 39.90,
+          currency_id: preference_data.currency || 'BRL',
+          description: preference_data.description || 'Acesso a todos os recursos premium'
         }
       ],
       payer: {
         name: profile?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'Usuário',
-        surname: profile?.full_name?.split(' ').slice(1).join(' ') || 'DiarioTer',
-        email: user.email || 'usuario@diarioter.com'
+        surname: profile?.full_name?.split(' ').slice(1).join(' ') || 'Equilibri',
+        email: user.email || 'usuario@equilibri.com'
       },
       back_urls: {
         success: `${process.env.NEXT_PUBLIC_APP_URL}/app/payment/success`,
@@ -77,7 +79,7 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: user.id,
         preference_id: response.body.id,
-        amount: preference_data.price || 29.90,
+        amount: preference_data.price || 39.90,
         status: 'pending'
       });
     

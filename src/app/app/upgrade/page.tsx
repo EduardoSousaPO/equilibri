@@ -8,6 +8,7 @@ export default function UpgradePage() {
   const [loading, setLoading] = useState<boolean>(true)
   const [isCreatingPayment, setIsCreatingPayment] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
+  const [selectedPlan, setSelectedPlan] = useState<string>('monthly')
   
   useEffect(() => {
     const fetchProfile = async () => {
@@ -47,16 +48,22 @@ export default function UpgradePage() {
     setError(null)
     
     try {
+      // Configurações para a chamada da API
+      const requestConfig = {
+        id: selectedPlan === 'monthly' ? 'premium_monthly' : 'premium_annual',
+        title: 'Assinatura Premium Equilibri - 1 mês',
+        price: selectedPlan === 'monthly' ? 39.90 : 399.90,
+        currency: 'BRL',
+        description: 'Acesso a todos os recursos premium do Equilibri'
+      };
+      
       const response = await fetch('/api/payments/create-preference', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          preference_data: {
-            title: 'Assinatura Premium DiarioTer - 1 mês',
-            price: 29.90
-          }
+          preference_data: requestConfig
         }),
       })
       
@@ -172,7 +179,7 @@ export default function UpgradePage() {
             <div className="text-center mb-6">
               <h2 className="text-xl font-semibold text-text-primary">Plano Premium</h2>
               <p className="text-text-secondary mt-1">Desbloqueie todo o potencial</p>
-              <p className="text-3xl font-bold text-text-primary mt-4">R$ 29,90</p>
+              <p className="text-3xl font-bold text-text-primary mt-4">R$ 39,90</p>
               <p className="text-text-secondary">por mês</p>
             </div>
             

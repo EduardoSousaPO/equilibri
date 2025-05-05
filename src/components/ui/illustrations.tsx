@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import React from 'react'
 
 // Definição de cores para ilustrações de emoções
 const emotionColors = {
@@ -10,79 +11,63 @@ const emotionColors = {
   neutral: '#A1A1AA'
 };
 
-// Componente de ilustração para emoção "Feliz"
-const HappyIllustration = () => {
-  return (
-    <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="60" cy="60" r="50" fill={emotionColors.happy} />
-      <circle cx="40" cy="50" r="5" fill="white" />
-      <circle cx="80" cy="50" r="5" fill="white" />
-      <path d="M40 75C40 75 50 90 80 75" stroke="white" strokeWidth="4" strokeLinecap="round" />
-    </svg>
-  );
-};
+// Ilustrações de emoções em estilo minimalista
+export const HappyIllustration = () => (
+  <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="40" fill="#F7F3E3" stroke="#B89434" strokeWidth="1.5" />
+    <path d="M35 45C36.6569 45 38 43.6569 38 42C38 40.3431 36.6569 39 35 39C33.3431 39 32 40.3431 32 42C32 43.6569 33.3431 45 35 45Z" fill="#304344" />
+    <path d="M65 45C66.6569 45 68 43.6569 68 42C68 40.3431 66.6569 39 65 39C63.3431 39 62 40.3431 62 42C62 43.6569 63.3431 45 65 45Z" fill="#304344" />
+    <path d="M67 60C67 68.8366 59.8366 75 50 75C40.1634 75 33 68.8366 33 60" stroke="#304344" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+)
 
-// Componente de ilustração para emoção "Calmo"
-const CalmIllustration = () => {
-  return (
-    <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="60" cy="60" r="50" fill={emotionColors.calm} />
-      <circle cx="40" cy="50" r="5" fill="white" />
-      <circle cx="80" cy="50" r="5" fill="white" />
-      <path d="M40 75H80" stroke="white" strokeWidth="4" strokeLinecap="round" />
-    </svg>
-  );
-};
+export const SadIllustration = () => (
+  <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="40" fill="#F9EFEF" stroke="#C86464" strokeWidth="1.5" />
+    <path d="M35 45C36.6569 45 38 43.6569 38 42C38 40.3431 36.6569 39 35 39C33.3431 39 32 40.3431 32 42C32 43.6569 33.3431 45 35 45Z" fill="#304344" />
+    <path d="M65 45C66.6569 45 68 43.6569 68 42C68 40.3431 66.6569 39 65 39C63.3431 39 62 40.3431 62 42C62 43.6569 63.3431 45 65 45Z" fill="#304344" />
+    <path d="M33 68C33 59.1634 40.1634 55 50 55C59.8366 55 67 59.1634 67 68" stroke="#304344" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+)
 
-// Componente de ilustração para emoção "Triste"
-const SadIllustration = () => {
-  return (
-    <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="60" cy="60" r="50" fill={emotionColors.sad} />
-      <circle cx="40" cy="50" r="5" fill="white" />
-      <circle cx="80" cy="50" r="5" fill="white" />
-      <path d="M40 85C40 85 50 70 80 85" stroke="white" strokeWidth="4" strokeLinecap="round" />
-    </svg>
-  );
-};
+export const AngryIllustration = () => (
+  <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="40" fill="#F2DFDF" stroke="#C86464" strokeWidth="1.5" />
+    <path d="M30 40L38 34" stroke="#304344" strokeWidth="2" strokeLinecap="round" />
+    <path d="M70 40L62 34" stroke="#304344" strokeWidth="2" strokeLinecap="round" />
+    <path d="M35 45C36.6569 45 38 43.6569 38 42C38 40.3431 36.6569 39 35 39C33.3431 39 32 40.3431 32 42C32 43.6569 33.3431 45 35 45Z" fill="#304344" />
+    <path d="M65 45C66.6569 45 68 43.6569 68 42C68 40.3431 66.6569 39 65 39C63.3431 39 62 40.3431 62 42C62 43.6569 63.3431 45 65 45Z" fill="#304344" />
+    <path d="M37 68C40 62 45 60 50 60C55 60 60 62 63 68" stroke="#304344" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+)
 
-// Componente de ilustração para emoção "Ansioso"
-const AnxiousIllustration = () => {
-  return (
-    <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="60" cy="60" r="50" fill={emotionColors.anxious} />
-      <circle cx="40" cy="50" r="5" fill="white" />
-      <circle cx="80" cy="50" r="5" fill="white" />
-      <path d="M40 75L80 75" stroke="white" strokeWidth="4" strokeLinecap="round" strokeDasharray="4 4" />
-    </svg>
-  );
-};
+export const AnxiousIllustration = () => (
+  <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="40" fill="#DCE9F0" stroke="#5799B6" strokeWidth="1.5" />
+    <path d="M35 45C36.6569 45 38 43.6569 38 42C38 40.3431 36.6569 39 35 39C33.3431 39 32 40.3431 32 42C32 43.6569 33.3431 45 35 45Z" fill="#304344" />
+    <path d="M65 45C66.6569 45 68 43.6569 68 42C68 40.3431 66.6569 39 65 39C63.3431 39 62 40.3431 62 42C62 43.6569 63.3431 45 65 45Z" fill="#304344" />
+    <path d="M40 66H60" stroke="#304344" strokeWidth="2" strokeLinecap="round" />
+    <path d="M42 58C42 58 45 54 50 54C55 54 58 58 58 58" stroke="#304344" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+)
 
-// Componente de ilustração para emoção "Irritado"
-const AngryIllustration = () => {
-  return (
-    <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="60" cy="60" r="50" fill={emotionColors.angry} />
-      <path d="M35 45L45 55" stroke="white" strokeWidth="4" strokeLinecap="round" />
-      <path d="M45 45L35 55" stroke="white" strokeWidth="4" strokeLinecap="round" />
-      <path d="M75 45L85 55" stroke="white" strokeWidth="4" strokeLinecap="round" />
-      <path d="M85 45L75 55" stroke="white" strokeWidth="4" strokeLinecap="round" />
-      <path d="M40 80L80 80" stroke="white" strokeWidth="4" strokeLinecap="round" />
-    </svg>
-  );
-};
+export const CalmIllustration = () => (
+  <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="40" fill="#E5F2F6" stroke="#1A7D93" strokeWidth="1.5" />
+    <path d="M35 45C36.6569 45 38 43.6569 38 42C38 40.3431 36.6569 39 35 39C33.3431 39 32 40.3431 32 42C32 43.6569 33.3431 45 35 45Z" fill="#304344" />
+    <path d="M65 45C66.6569 45 68 43.6569 68 42C68 40.3431 66.6569 39 65 39C63.3431 39 62 40.3431 62 42C62 43.6569 63.3431 45 65 45Z" fill="#304344" />
+    <path d="M40 63C43 65 46 66 50 66C54 66 57 65 60 63" stroke="#304344" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+)
 
-// Componente de ilustração para emoção "Neutro"
-const NeutralIllustration = () => {
-  return (
-    <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="60" cy="60" r="50" fill={emotionColors.neutral} />
-      <circle cx="40" cy="50" r="5" fill="white" />
-      <circle cx="80" cy="50" r="5" fill="white" />
-      <path d="M40 75H80" stroke="white" strokeWidth="4" strokeLinecap="round" />
-    </svg>
-  );
-};
+export const NeutralIllustration = () => (
+  <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="40" fill="#F6F2E8" stroke="#787F7F" strokeWidth="1.5" />
+    <path d="M35 45C36.6569 45 38 43.6569 38 42C38 40.3431 36.6569 39 35 39C33.3431 39 32 40.3431 32 42C32 43.6569 33.3431 45 35 45Z" fill="#304344" />
+    <path d="M65 45C66.6569 45 68 43.6569 68 42C68 40.3431 66.6569 39 65 39C63.3431 39 62 40.3431 62 42C62 43.6569 63.3431 45 65 45Z" fill="#304344" />
+    <path d="M40 63H60" stroke="#304344" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+)
 
 // Componente de ilustração para ondas de meditação
 const MeditationWaves = () => {
@@ -187,12 +172,6 @@ const TherapistIcon = () => {
 
 export {
   emotionColors,
-  HappyIllustration,
-  CalmIllustration,
-  SadIllustration,
-  AnxiousIllustration,
-  AngryIllustration,
-  NeutralIllustration,
   MeditationWaves,
   ProgressChart,
   JournalIcon,

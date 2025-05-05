@@ -195,6 +195,41 @@ export async function updateJournalEntry(id: string, updates: Partial<JournalEnt
   }
 }
 
+export async function getJournalEntryById(id: string) {
+  const supabase = createClientSupabaseClient()
+  
+  try {
+    // Verificar autenticação
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      return { data: null, error: 'Não autenticado' }
+    }
+    
+    // Buscar a entrada específica
+    const { data, error } = await supabase
+      .from('journal_entries')
+      .select('*, profiles(name)')
+      .eq('id', id)
+      .single()
+    
+    if (error) throw error
+    
+    // Verificar se o usuário tem permissão para visualizar esta entrada
+    if (data.user_id !== user.id) {
+      return { data: null, error: 'Você não tem permissão para visualizar esta entrada' }
+    }
+    
+    return { data, error: null }
+  } catch (error: any) {
+    console.error('Error fetching journal entry:', error)
+    return { 
+      data: null, 
+      error: error.message || 'Erro ao buscar entrada de diário'
+    }
+  }
+}
+
 export async function deleteJournalEntry(id: string) {
   const supabase = createClientSupabaseClient()
   
@@ -279,16 +314,47 @@ export async function uploadAudio(file: File, userId: string) {
   const supabase = createClientSupabaseClient()
   
   try {
+    // Verificar se o usuário está autenticado
+    if (!userId) {
+      return { data: null, error: 'Usuário não autenticado' }
+    }
+
+    // Validar o arquivo
+    if (!file || file.size === 0) {
+      return { data: null, error: 'Arquivo de áudio inválido' }
+    }
+
+    // Criar caminho para o arquivo
     const fileExt = file.name.split('.').pop()
     const fileName = `${userId}/${Date.now()}.${fileExt}`
     const filePath = `audio/${fileName}`
     
+    // Verificar se o bucket existe
+    const { data: buckets } = await supabase.storage.listBuckets()
+    const audioBucketExists = buckets?.some(b => b.name === 'audio_uploads')
+    
+    if (!audioBucketExists) {
+      console.error('Bucket audio_uploads não existe')
+      return { data: null, error: 'Erro de configuração de armazenamento' }
+    }
+    
+    // Fazer upload do arquivo
     const { data, error } = await supabase
       .storage
       .from('audio_uploads')
-      .upload(filePath, file)
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      })
     
-    if (error) throw error
+    if (error) {
+      console.error('Erro específico de upload:', error)
+      return { data: null, error: `Erro ao fazer upload do áudio: ${error.message}` }
+    }
+    
+    if (!data || !data.path) {
+      return { data: null, error: 'Caminho de arquivo inválido após upload' }
+    }
     
     // Obter URL pública
     const { data: { publicUrl } } = supabase
@@ -296,10 +362,14 @@ export async function uploadAudio(file: File, userId: string) {
       .from('audio_uploads')
       .getPublicUrl(filePath)
     
+    if (!publicUrl) {
+      return { data: null, error: 'Erro ao obter URL público do áudio' }
+    }
+    
     return { data: publicUrl, error: null }
   } catch (error) {
     console.error('Error uploading audio:', error)
-    return { data: null, error: 'Erro ao fazer upload do áudio' }
+    return { data: null, error: error instanceof Error ? error.message : 'Erro ao fazer upload do áudio' }
   }
 }
 
@@ -618,10 +688,25 @@ export async function updateProfile(updates: Partial<{ name: string, avatar_url:
       return { data: null, error: 'Não autenticado' }
     }
     
+    // Verificar se o perfil já existe
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+    
+    // Preparar os dados a serem inseridos/atualizados
+    const profileData = {
+      id: user.id,
+      ...existingProfile, // Manter dados existentes se houver
+      ...updates, // Aplicar as atualizações
+      updated_at: new Date().toISOString()
+    }
+    
+    // Usar upsert para criar ou atualizar o perfil
     const { data, error } = await supabase
       .from('profiles')
-      .update(updates)
-      .eq('id', user.id)
+      .upsert(profileData)
       .select()
       .single()
     

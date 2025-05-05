@@ -132,13 +132,29 @@ export default function AudioRecordPage() {
     try {
       // Fazer upload do áudio para o Supabase Storage
       const file = new File([audioBlob], `recording-${Date.now()}.wav`, { type: 'audio/wav' })
-      const { data: audioUrl, error: uploadError } = await uploadAudio(file, userId)
       
-      if (uploadError || !audioUrl) {
-        throw new Error(uploadError || 'Erro ao fazer upload do áudio')
+      // Verificar tamanho do arquivo
+      if (file.size > 15 * 1024 * 1024) { // 15MB
+        setError('O arquivo de áudio é muito grande. Limite máximo de 15MB.')
+        setIsProcessing(false)
+        return
       }
       
+      console.log("Iniciando upload de áudio. Tamanho:", Math.round(file.size/1024), "KB")
+      const uploadResult = await uploadAudio(file, userId)
+      
+      if (uploadResult.error || !uploadResult.data) {
+        console.error("Erro detalhado de upload:", uploadResult.error)
+        setError(`Erro ao fazer upload do áudio: ${uploadResult.error}`)
+        setIsProcessing(false)
+        return
+      }
+      
+      const audioUrl = uploadResult.data
+      console.log("Upload bem-sucedido. URL:", audioUrl)
+      
       // Transcrever e analisar o áudio
+      console.log("Iniciando transcrição do áudio")
       const response = await fetch('/api/transcribe', {
         method: 'POST',
         headers: {
@@ -161,7 +177,7 @@ export default function AudioRecordPage() {
       }
     } catch (error) {
       console.error('Error processing audio:', error)
-      setError('Ocorreu um erro ao processar o áudio. Por favor, tente novamente.')
+      setError(error instanceof Error ? error.message : 'Ocorreu um erro ao processar o áudio. Por favor, tente novamente.')
     } finally {
       setIsProcessing(false)
     }

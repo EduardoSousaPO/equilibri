@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="240" height="80" viewBox="0 0 240 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fundo translúcido -->
+  <rect width="240" height="80" rx="4" fill="#F8F5EF" fillOpacity="0.95" />
+  
+  <!-- Símbolo de equilíbrio - círculo com linha horizontal -->
+  <circle cx="120" cy="35" r="20" stroke="#0A515F" strokeWidth="1.8" fill="none" />
+  <line x1="100" y1="35" x2="140" y2="35" stroke="#0A515F" strokeWidth="1.8" />
+  
+  <!-- Elementos de equilíbrio - pequenos círculos nas extremidades -->
+  <circle cx="100" cy="35" r="3" fill="#B89035" />
+  <circle cx="140" cy="35" r="3" fill="#B89035" />
+  
+  <!-- Linhas minimalistas de página de livro -->
+  <path d="M120 15V55" stroke="#0A515F" strokeWidth="1.8" />
+  <path d="M110 20C110 18.3431 111.343 17 113 17H120V53H113C111.343 53 110 51.6569 110 50V20Z" fill="#FEFEFE" stroke="#0A515F" strokeWidth="1" />
+  <path d="M130 20C130 18.3431 128.657 17 127 17H120V53H127C128.657 53 130 51.6569 130 50V20Z" fill="#FEFEFE" stroke="#0A515F" strokeWidth="1" />
+  
+  <!-- Texto EQUILIBRI -->
+  <text x="68" y="70" font-family="Georgia, serif" font-size="16" font-weight="bold" letter-spacing="1" fill="#0A515F">EQUILIBRI</text>
+  
+  <!-- Texto "AI DIARY & INSIGHT" mais sutil -->
+  <text x="86" y="78" font-family="Arial, sans-serif" font-size="7" letter-spacing="1.5" fill="#7D8384">AI DIARY &amp; INSIGHT</text>
+</svg> 

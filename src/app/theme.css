@@ -1,35 +1,59 @@
-/* Arquivo de tema para o DiarioTer */
+/* Arquivo de tema para o Equilibri - Design Minimalista e Equilibrado */
 
 :root {
-  /* Paleta de Cores Principal */
-  --primary: #186FAF;
-  --primary-light: #3A97D4;
-  --accent: #A38AFF;
-  --success: #4ECDC4;
+  /* Paleta de Cores Principal - Mais minimalista e equilibrada */
+  --primary: #0A515F; /* Azul petróleo mais suave */
+  --primary-light: #136D7F; /* Tom médio para hover */
+  --primary-ultra-light: #E9F3F5; /* Tom muito suave para fundos sutis */
+  --accent: #B89035; /* Dourado mais equilibrado */
+  --accent-light: #F2ECD7; /* Dourado bem claro */
+  --success: #5E9A85; /* Verde acinzentado equilibrado */
   
-  /* Paleta Neutra */
-  --background: #FFFFFF;
-  --background-secondary: #F5F7FA;
-  --border: #E2E8F0;
-  --text-secondary: #64748B;
-  --text-primary: #18181B;
+  /* Paleta Neutra - Minimalista */
+  --background: #FEFEFE; /* Branco com tom bem suave */
+  --background-secondary: #F8F5EF; /* Creme bem clarinho */
+  --border: #EEEBE5; /* Borda sutil com tom creme */
+  --text-secondary: #7D8384; /* Cinza médio equilibrado */
+  --text-primary: #2A3B3E; /* Cinza escuro esverdeado */
   
   /* Estados */
-  --error: #FF6B6B;
-  --warning: #FFD166;
-  --info: #3A97D4;
+  --error: #B86464; /* Vermelho mais suave e menos vibrante */
+  --warning: #D9AD6B; /* Laranja mais suave e acinzentado */
+  --info: #5291AD; /* Azul mais equilibrado */
   
-  /* Sombras */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  /* Feedback de cores mais suaves */
+  --success-50: #F4F9F7;
+  --success-100: #E2F0EB;
+  --error-50: #F9F1F1;
+  --error-100: #F2E4E4;
+  --warning-50: #FCF8F2;
+  --warning-100: #F8F0E2;
+  --info-50: #F0F6F9;
+  --info-100: #E3EFF4;
   
-  /* Arredondamento */
-  --radius-sm: 0.25rem;
-  --radius: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
+  /* Variáveis de Cores Equilibri */
+  --teal-900: #0A515F;
+  --teal-800: #136D7F;
+  --teal-700: #308799;
+  --teal-50: #E9F3F5;
+  --cream-50: #F8F5EF;
+  --cream-100: #F2ECD7;
+  --gold-500: #B89035;
+  --gold-400: #D6C479;
+  --gold-100: #F9F6E9;
+  
+  /* Sombras - Mais sutis */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 2px 4px -1px rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 3px 6px -2px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+  --shadow-xl: 0 4px 8px -2px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+  
+  /* Arredondamento - Mais suave */
+  --radius-sm: 0.3rem;
+  --radius: 0.4rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.7rem;
   --radius-full: 9999px;
   
   /* Espaçamento */
@@ -42,42 +66,81 @@
   --spacing-12: 3rem;
   --spacing-16: 4rem;
   
-  /* Transições */
-  --transition-fast: 150ms;
-  --transition: 300ms;
-  --transition-slow: 500ms;
+  /* Transições - Mais suaves */
+  --transition-fast: 250ms;
+  --transition: 350ms;
+  --transition-slow: 450ms;
+  
+  /* Propriedades de cursor de foco */
+  --focus-ring: 0 0 0 2px rgba(19, 109, 127, 0.15);
+  --focus-ring-offset: 1px;
+  
+  /* Variáveis de layout */
+  --content-width-sm: 640px;
+  --content-width-md: 768px;
+  --content-width-lg: 1024px;
+  --content-width-xl: 1280px;
+  
+  /* Opacidade */
+  --opacity-hover: 0.88;
+  --opacity-active: 0.92;
+  --opacity-disabled: 0.65;
 }
 
-/* Modo escuro */
+/* Modo escuro - mais equilibrado */
 .dark {
-  --primary: #3A97D4;
-  --primary-light: #186FAF;
-  --accent: #A38AFF;
-  --success: #4ECDC4;
+  --primary: #136D7F;
+  --primary-light: #0A515F;
+  --primary-ultra-light: #0E2A33;
+  --accent: #D6C479;
+  --accent-light: #3A3629;
+  --success: #5E9A85;
   
-  --background: #18181B;
-  --background-secondary: #27272A;
-  --border: #3F3F46;
-  --text-secondary: #A1A1AA;
-  --text-primary: #F5F7FA;
+  --background: #1A1E1F;
+  --background-secondary: #232728;
+  --border: #373D3E;
+  --text-secondary: #9DA3A4;
+  --text-primary: #E5EBEC;
+  
+  --teal-900: #136D7F;
+  --teal-800: #1F7D8F;
+  --teal-700: #308799;
+  --teal-50: #0E2A33;
+  --cream-50: #232728;
+  --cream-100: #2D3233;
+  --gold-500: #D6C479;
+  --gold-400: #C2B26A;
+  --gold-100: #3A3629;
+  
+  --focus-ring: 0 0 0 2px rgba(19, 109, 127, 0.3);
 }
 
 /* Estilos base */
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   color: var(--text-primary);
   background-color: var(--background);
   transition: background-color var(--transition), color var(--transition);
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Tipografia */
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 700;
-  line-height: 1.2;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-top: 0;
+  margin-bottom: 0.5em;
 }
 
 h1 {
-  font-size: 2rem;
+  font-size: 1.875rem;
+  letter-spacing: -0.025em;
 }
 
 h2 {
@@ -88,19 +151,34 @@ h3 {
   font-size: 1.25rem;
 }
 
-p {
-  line-height: 1.6;
+h4 {
+  font-size: 1.125rem;
 }
 
-/* Botões */
+p {
+  line-height: 1.6;
+  margin-top: 0;
+  margin-bottom: 0.75em;
+}
+
+/* Botões - Mais minimalistas */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius);
-  padding: var(--spacing-2) var(--spacing-4);
+  padding: 0.5rem 1rem;
   font-weight: 500;
+  font-size: 0.875rem;
   transition: all var(--transition);
+  position: relative;
+  border: none;
+  cursor: pointer;
+}
+
+.btn:focus {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .btn-primary {
@@ -112,13 +190,18 @@ p {
   background-color: var(--primary-light);
 }
 
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
 .btn-secondary {
   background-color: var(--background-secondary);
   color: var(--text-primary);
+  border: 1px solid var(--border);
 }
 
 .btn-secondary:hover {
-  background-color: var(--border);
+  background-color: var(--cream-100);
 }
 
 .btn-accent {
@@ -127,51 +210,81 @@ p {
 }
 
 .btn-accent:hover {
-  opacity: 0.9;
+  opacity: var(--opacity-hover);
 }
 
-/* Cards */
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}
+
+.btn-outline:hover {
+  background-color: var(--primary-ultra-light);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--text-primary);
+}
+
+.btn-ghost:hover {
+  background-color: var(--background-secondary);
+}
+
+/* Cards - Mais minimalistas e equilibrados */
 .card {
   background-color: var(--background);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   padding: var(--spacing-4);
-  transition: box-shadow var(--transition);
+  transition: all var(--transition);
+  border: 1px solid var(--border);
+  overflow: hidden;
 }
 
 .card:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow);
+  border-color: var(--border);
 }
 
-/* Inputs */
+/* Inputs - Mais minimalistas */
 .input {
   width: 100%;
-  padding: var(--spacing-2) var(--spacing-3);
+  padding: 0.6rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background-color: var(--background);
   color: var(--text-primary);
-  transition: border-color var(--transition);
+  transition: border-color var(--transition), box-shadow var(--transition);
+  font-size: 0.875rem;
 }
 
 .input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(24, 111, 175, 0.2);
+  box-shadow: var(--focus-ring);
 }
 
-/* Animações */
+.input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+/* Animações suaves */
 @keyframes fadeIn {
   from {
     opacity: 0;
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
 .fade-in {
-  animation: fadeIn var(--transition) ease-in-out;
+  animation: fadeIn var(--transition) ease-out;
 }
 
 @keyframes pulse {
@@ -187,35 +300,101 @@ p {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Utilitários */
-.text-primary {
+/* Classes de utilidade */
+.text-primary-color {
   color: var(--primary);
 }
 
-.text-accent {
+.text-accent-color {
   color: var(--accent);
 }
 
-.text-success {
+.text-success-color {
   color: var(--success);
 }
 
-.text-error {
+.text-error-color {
   color: var(--error);
 }
 
-.bg-primary {
+.bg-primary-color {
   background-color: var(--primary);
 }
 
-.bg-accent {
+.bg-primary-ultra-light {
+  background-color: var(--primary-ultra-light);
+}
+
+.bg-accent-color {
   background-color: var(--accent);
 }
 
-.bg-success {
+.bg-accent-light {
+  background-color: var(--accent-light);
+}
+
+.bg-success-color {
   background-color: var(--success);
 }
 
-.bg-error {
+.bg-error-color {
   background-color: var(--error);
+}
+
+/* Elementos equilibrados */
+.divider {
+  height: 1px;
+  background-color: var(--border);
+  margin: var(--spacing-4) 0;
+  width: 100%;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: var(--background-secondary);
+  color: var(--text-secondary);
+  transition: all var(--transition);
+}
+
+.tag-primary {
+  background-color: var(--primary-ultra-light);
+  color: var(--primary);
+}
+
+.tag-accent {
+  background-color: var(--accent-light);
+  color: var(--accent);
+}
+
+/* Elementos de equilíbrio visual */
+.balance-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-4);
+}
+
+.centered-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Efeitos de serenidade */
+.serene-transition {
+  transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.hover-lift {
+  transition: transform var(--transition);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
 }

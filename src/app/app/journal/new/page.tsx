@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import { createClientSupabaseClient, createJournalEntry, checkJournalEntryLimit, checkUserAuthentication } from '@/lib/supabase/client-queries'
-import { useUser } from '@clerk/nextjs'
 
 export default function JournalEntryPage() {
   const [title, setTitle] = useState<string>('')
@@ -16,9 +15,9 @@ export default function JournalEntryPage() {
   const [error, setError] = useState<string | null>(null)
   const [limitReached, setLimitReached] = useState<boolean>(false)
   const [userId, setUserId] = useState<string | null>(null)
+  const [userData, setUserData] = useState<any | null>(null)
   
   const contentRef = useRef<HTMLTextAreaElement>(null)
-  const { user: clerkUser, isLoaded: isClerkUserLoaded } = useUser()
   
   useEffect(() => {
     const fetchUser = async () => {
@@ -49,6 +48,7 @@ export default function JournalEntryPage() {
         }
         
         setUserId(user.id)
+        setUserData(user)
         
         // Verificar se o perfil existe
         const supabase = createClientSupabaseClient()
@@ -59,13 +59,13 @@ export default function JournalEntryPage() {
           .single()
         
         // Se o perfil não existir, cria um novo
-        if (!profileData && clerkUser && isClerkUserLoaded) {
+        if (!profileData) {
           const { data: newProfile, error: profileError } = await supabase
             .from('profiles')
-            .insert({
+            .upsert({
               id: user.id,
-              name: clerkUser.fullName || '',
-              email: clerkUser.primaryEmailAddress?.emailAddress || '',
+              name: user.user_metadata?.name || '',
+              email: user.email || '',
               subscription_tier: 'free'
             })
             .select()
@@ -73,7 +73,7 @@ export default function JournalEntryPage() {
           
           if (profileError) {
             console.error('Erro ao criar perfil:', profileError)
-            setError('Erro ao criar perfil de usuário. Por favor, tente novamente.')
+            setError(`Erro ao criar perfil de usuário: ${profileError.message || JSON.stringify(profileError)}`)
             return
           }
         }
@@ -87,10 +87,8 @@ export default function JournalEntryPage() {
       }
     }
     
-    if (isClerkUserLoaded) {
     fetchUser()
-    }
-  }, [clerkUser, isClerkUserLoaded])
+  }, [])
   
   // Ajustar altura do textarea automaticamente
   useEffect(() => {

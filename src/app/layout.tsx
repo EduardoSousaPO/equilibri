@@ -1,13 +1,17 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
-
-const inter = Inter({ subsets: ['latin'] })
+import './theme.css'
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'DiarioTer - Companheiro Terapêutico Inteligente',
-  description: 'Um diário terapêutico inteligente com análise baseada em evidências científicas',
+  title: 'Equilibri - AI Diary & Insight',
+  description: 'Transforme seus pensamentos em insights terapêuticos com o Equilibri - AI Diary & Insight',
+  icons: {
+    icon: [
+      { url: '/equilibri-icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' }
+    ],
+    apple: { url: '/equilibri-logo.svg', type: 'image/svg+xml' }
+  }
 }
 
 export default function RootLayout({
@@ -16,14 +20,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider
-      experimental={{
-        persistClient: true
-      }}
-    >
     <html lang="pt-BR">
-      <body className={inter.className}>{children}</body>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
+      <body className="min-h-screen font-sans bg-cream-50">
+        {children}
+      </body>
     </html>
-    </ClerkProvider>
   )
 }

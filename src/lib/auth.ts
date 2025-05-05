@@ -1,26 +1,37 @@
-import { currentUser, auth as clerkAuth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { Database } from '@/types/supabase'
+
+/**
+ * Cria um cliente Supabase para uso em componentes de servidor
+ */
+export function createSupabaseServerClient() {
+  return createServerComponentClient<Database>({ cookies });
+}
 
 /**
  * Obtém o ID do usuário atual logado
  * Redireciona para login se não estiver autenticado
  */
 export async function getCurrentUserId(): Promise<string> {
-  const { userId } = await clerkAuth()
+  const supabase = createSupabaseServerClient()
+  const { data, error } = await supabase.auth.getUser()
   
-  if (!userId) {
+  if (error || !data.user) {
     redirect('/login')
   }
   
-  return userId
+  return data.user.id
 }
 
 /**
  * Verifica se o usuário está autenticado
  */
 export async function isAuthenticated(): Promise<boolean> {
-  const { userId } = await clerkAuth()
-  return !!userId
+  const supabase = createSupabaseServerClient()
+  const { data } = await supabase.auth.getUser()
+  return !!data.user
 }
 
 /**
@@ -28,13 +39,14 @@ export async function isAuthenticated(): Promise<boolean> {
  * Redireciona para login se não estiver autenticado
  */
 export async function getCurrentSession() {
-  const session = await clerkAuth()
+  const supabase = createSupabaseServerClient()
+  const { data, error } = await supabase.auth.getSession()
   
-  if (!session.userId) {
+  if (error || !data.session) {
     redirect('/login')
   }
   
-  return session
+  return data.session
 }
 
 /**
@@ -42,11 +54,12 @@ export async function getCurrentSession() {
  * Redireciona para login se não estiver autenticado
  */
 export async function getUser() {
-  const user = await currentUser()
+  const supabase = createSupabaseServerClient()
+  const { data, error } = await supabase.auth.getUser()
   
-  if (!user) {
+  if (error || !data.user) {
     redirect('/login')
   }
   
-  return user
+  return data.user
 } 
