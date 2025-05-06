@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 // Implementação do hook useMediaQuery
 export function useMediaQuery(query: string): boolean {
