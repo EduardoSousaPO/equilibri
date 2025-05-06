@@ -1,22 +1,7 @@
 {
-  "buildCommand": "npm run build",
-  "cleanUrls": true,
-  "framework": "nextjs",
-  "outputDirectory": ".next",
-  "git": {
-    "deploymentEnabled": {
-      "main": true
-    }
-  },
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
   "version": 2,
-  "github": {
-    "enabled": true,
-    "silent": false
-  }
+  "framework": "nextjs",
+  "buildCommand": "pnpm run build",
+  "devCommand": "pnpm run dev",
+  "installCommand": "pnpm install"
 } 
