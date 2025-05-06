@@ -1,12 +1,14 @@
-import mercadopago from 'mercadopago';
+import { MercadoPagoConfig, Payment } from 'mercadopago';
 import { NextRequest, NextResponse } from 'next/server';
 import { createRouteClient } from '@/lib/supabase/server';
+import { PostgrestBuilder } from '@supabase/postgrest-js';
 
 // Configurar SDK do Mercado Pago
-// @ts-ignore - Ignorando erros de tipo para o SDK do Mercado Pago
-mercadopago.configure({
-  access_token: process.env.MERCADO_PAGO_ACCESS_TOKEN || ''
+const mercadopago = new MercadoPagoConfig({
+  accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN || ''
 });
+
+const payment = new Payment(mercadopago);
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,27 +24,29 @@ export async function POST(request: NextRequest) {
     
     // Obter informações do pagamento
     const paymentId = payload.data.id;
-    // @ts-ignore - Ignorando erros de tipo para o SDK do Mercado Pago
-    const payment = await mercadopago.payment.get(paymentId);
+    const paymentData = await payment.get({ id: paymentId });
     
-    if (!payment || !payment.body) {
+    if (!paymentData || !paymentData.id) {
       return NextResponse.json({ success: false }, { status: 400 });
     }
     
-    const { status, external_reference, transaction_amount } = payment.body;
+    const { status, external_reference, transaction_amount } = paymentData;
     const userId = external_reference;
     
     // Atualizar o status da tentativa de pagamento
     if (userId) {
+      // Abordagem tipada com upsert para evitar problemas com o método .eq()
       await supabase
         .from('payment_attempts')
-        .update({
+        .upsert({
+          user_id: userId,
           status: status,
           payment_id: paymentId,
           updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId)
-        .eq('status', 'pending');
+        }, {
+          onConflict: 'user_id',
+          ignoreDuplicates: false
+        });
       
       // Se o pagamento foi aprovado, atualizar a assinatura do usuário
       if (status === 'approved') {
@@ -50,13 +54,14 @@ export async function POST(request: NextRequest) {
         const currentDate = new Date();
         
         // Verificar se o usuário já tem uma assinatura ativa
-        const { data: existingSubscription } = await supabase
+        const { data: existingSubscriptions } = await supabase
           .from('subscriptions')
           .select('*')
-          .eq('user_id', userId)
+          .match({ user_id: userId })
           .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
+          .limit(1);
+        
+        const existingSubscription = existingSubscriptions?.[0];
         
         // Calcular nova data de término
         let startDate = currentDate;
@@ -80,14 +85,14 @@ export async function POST(request: NextRequest) {
             payment_id: paymentId
           });
         
-        // Atualizar tier de assinatura
+        // Atualizar tier de assinatura usando match em vez de eq
         await supabase
           .from('profiles')
           .update({
             subscription_tier: 'premium',
             updated_at: currentDate.toISOString()
           })
-          .eq('id', userId);
+          .match({ id: userId });
       }
     }
     

@@ -32,6 +32,10 @@ export interface ButtonMetallicProps
   asChild?: boolean;
 }
 
+// Definimos explicitamente os tipos para variant e size como auxiliares para o TypeScript
+type ButtonVariant = NonNullable<VariantProps<typeof buttonMetallicVariants>["variant"]>;
+type ButtonSize = NonNullable<VariantProps<typeof buttonMetallicVariants>["size"]>;
+
 const ButtonMetallic = React.forwardRef<HTMLButtonElement, ButtonMetallicProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     return (
