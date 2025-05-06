@@ -14,5 +14,9 @@
       "use": "@vercel/next"
     }
   ],
-  "version": 2
+  "version": 3,
+  "github": {
+    "enabled": true,
+    "silent": false
+  }
 } 
