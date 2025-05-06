@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import { useMediaQuery } from '@/hooks/mediaQueryUtils';
 
 // Mock do hook useMediaQuery
-jest.mock('@/hooks/useMediaQuery', () => ({
+jest.mock('@/hooks/mediaQueryUtils', () => ({
   useMediaQuery: jest.fn(),
 }));
 
