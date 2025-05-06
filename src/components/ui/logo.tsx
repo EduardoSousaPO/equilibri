@@ -88,55 +88,40 @@ export const IconLogo = ({ className = "w-8 h-8" }: { className?: string }) => {
   )
 }
 
-// Nova logo Equilibri minimalista com foco em equilíbrio (versão atual)
-export const EquilibriLogo = ({ className = 'h-10 w-auto' }: { className?: string }) => {
+// Nova logo Equilibri com escudo e símbolo de planta (versão atualizada)
+export const EquilibriLogo = ({ className = 'h-12 w-auto' }: { className?: string }) => {
   return (
-    <svg className={className} width="240" height="80" viewBox="0 0 240 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Fundo translúcido */}
-      <rect width="240" height="80" rx="4" fill="#F8F5EF" fillOpacity="0.9" />
-      
-      {/* Símbolo de equilíbrio - círculo com linha horizontal */}
-      <circle cx="120" cy="35" r="20" stroke="#0A515F" strokeWidth="1.8" fill="none" />
-      <line x1="100" y1="35" x2="140" y2="35" stroke="#0A515F" strokeWidth="1.8" />
-      
-      {/* Elementos de equilíbrio - pequenos círculos nas extremidades */}
-      <circle cx="100" cy="35" r="3" fill="#B89035" />
-      <circle cx="140" cy="35" r="3" fill="#B89035" />
-      
-      {/* Linhas minimalistas de página de livro */}
-      <path d="M120 15V55" stroke="#0A515F" strokeWidth="1.8" />
-      <path d="M110 20C110 18.3431 111.343 17 113 17H120V53H113C111.343 53 110 51.6569 110 50V20Z" fill="#FEFEFE" stroke="#0A515F" strokeWidth="1" />
-      <path d="M130 20C130 18.3431 128.657 17 127 17H120V53H127C128.657 53 130 51.6569 130 50V20Z" fill="#FEFEFE" stroke="#0A515F" strokeWidth="1" />
-      
-      {/* Texto EQUILIBRI */}
-      <text x="68" y="70" fontFamily="Georgia, serif" fontSize="16" fontWeight="bold" letterSpacing="1" fill="#0A515F">EQUILIBRI</text>
-      
-      {/* Texto "AI DIARY & INSIGHT" mais sutil */}
-      <text x="86" y="78" fontFamily="Arial, sans-serif" fontSize="7" letterSpacing="1.5" fill="#7D8384">AI DIARY &amp; INSIGHT</text>
-    </svg>
+    <div className={`${className} relative logo-shadow`}>
+      <svg viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
+        <g fill="#1D3C34">
+          <path d="M400 142c-158.5 0-286.9 128.4-286.9 286.9 0 158.5 128.4 286.9 286.9 286.9s286.9-128.4 286.9-286.9C686.9 270.4 558.5 142 400 142zm0 524.6c-131 0-237.7-106.6-237.7-237.7 0-131 106.6-237.7 237.7-237.7 131 0 237.7 106.6 237.7 237.7 0 131-106.7 237.7-237.7 237.7z"/>
+          <path d="M208.7 370.5h382.6v59H208.7z"/>
+          <path d="M400 370.5c-32.6 0-59 26.4-59 59h118c0-32.6-26.4-59-59-59z"/>
+          <ellipse cx="400" cy="488.5" rx="59" ry="59"/>
+          <path d="M400 192.9c-32.6 0-59 26.4-59 59h118c0-32.6-26.4-59-59-59zM282 311.5c-32.6 0-59 26.4-59 59h118c0-32.6-26.4-59-59-59zM518 311.5c-32.6 0-59 26.4-59 59h118c0-32.6-26.4-59-59-59z"/>
+        </g>
+      </svg>
+      <div className="mt-2 text-center">
+        <h2 className="text-forest-900 font-serif font-bold text-2xl tracking-wider">Equilibri</h2>
+        <p className="text-xs text-gray-600 tracking-wide">DIÁRIO TERAPÊUTICO DIGITAL</p>
+      </div>
+    </div>
   )
 }
 
-// Novo ícone Equilibri minimalista (versão atual)
-export const EquilibriIcon = ({ className = 'h-8 w-8' }: { className?: string }) => {
+// Novo ícone Equilibri minimalista (versão atualizada)
+export const EquilibriIcon = ({ className = 'h-10 w-10' }: { className?: string }) => {
   return (
-    <svg className={className} width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Círculo de fundo */}
-      <circle cx="20" cy="20" r="20" fill="#0A515F" />
-      
-      {/* Símbolo de equilíbrio - linha horizontal */}
-      <line x1="10" y1="20" x2="30" y2="20" stroke="#F8F5EF" strokeWidth="2" />
-      
-      {/* Marcas de equilíbrio */}
-      <circle cx="10" cy="20" r="2" fill="#B89035" />
-      <circle cx="30" cy="20" r="2" fill="#B89035" />
-      
-      {/* Linha central do livro */}
-      <line x1="20" y1="10" x2="20" y2="30" stroke="#F8F5EF" strokeWidth="2" />
-      
-      {/* Páginas simplificadas */}
-      <path d="M14 12C14 11.4477 14.4477 11 15 11H20V29H15C14.4477 29 14 28.5523 14 28V12Z" fill="#FEFEFE" stroke="#F8F5EF" strokeWidth="0.5" />
-      <path d="M26 12C26 11.4477 25.5523 11 25 11H20V29H25C25.5523 29 26 28.5523 26 28V12Z" fill="#FEFEFE" stroke="#F8F5EF" strokeWidth="0.5" />
-    </svg>
+    <div className={`${className} relative logo-shadow`}>
+      <svg viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
+        <g fill="#1D3C34">
+          <path d="M400 142c-158.5 0-286.9 128.4-286.9 286.9 0 158.5 128.4 286.9 286.9 286.9s286.9-128.4 286.9-286.9C686.9 270.4 558.5 142 400 142zm0 524.6c-131 0-237.7-106.6-237.7-237.7 0-131 106.6-237.7 237.7-237.7 131 0 237.7 106.6 237.7 237.7 0 131-106.7 237.7-237.7 237.7z"/>
+          <path d="M208.7 370.5h382.6v59H208.7z"/>
+          <path d="M400 370.5c-32.6 0-59 26.4-59 59h118c0-32.6-26.4-59-59-59z"/>
+          <ellipse cx="400" cy="488.5" rx="59" ry="59"/>
+          <path d="M400 192.9c-32.6 0-59 26.4-59 59h118c0-32.6-26.4-59-59-59zM282 311.5c-32.6 0-59 26.4-59 59h118c0-32.6-26.4-59-59-59zM518 311.5c-32.6 0-59 26.4-59 59h118c0-32.6-26.4-59-59-59z"/>
+        </g>
+      </svg>
+    </div>
   )
 }

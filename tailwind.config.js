@@ -62,6 +62,14 @@ module.exports = {
           DEFAULT: 'var(--info)',
           light: 'rgba(58, 151, 212, 0.2)',
         },
+        forest: {
+          900: 'var(--forest-900)',
+          800: 'var(--forest-800)',
+        },
+        gold: {
+          500: 'var(--gold-500)',
+          400: 'var(--gold-400)',
+        },
       },
       borderRadius: {
         lg: 'var(--radius-lg)',
@@ -71,6 +79,7 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
+        serif: ['Georgia', 'Times New Roman', 'serif'],
         display: ['Lexend', 'sans-serif'],
       },
       boxShadow: {
@@ -78,14 +87,20 @@ module.exports = {
         DEFAULT: 'var(--shadow)',
         md: 'var(--shadow-md)',
         lg: 'var(--shadow-lg)',
+        metallic: '0 4px 12px rgba(156, 138, 90, 0.15)',
       },
       animation: {
         'fade-in': 'fadeIn var(--transition) ease-in-out',
         'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'shimmer': 'shimmer 3s linear infinite',
       },
       transitionProperty: {
         'height': 'height',
         'spacing': 'margin, padding',
+      },
+      backgroundImage: {
+        'metallic-gold': 'var(--metallic-gold)',
+        'metallic-silver': 'var(--metallic-silver)',
       },
       typography: {
         DEFAULT: {

@@ -1,19 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Círculo de fundo -->
-  <circle cx="20" cy="20" r="20" fill="#0A515F" />
-  
-  <!-- Símbolo de equilíbrio - linha horizontal -->
-  <line x1="10" y1="20" x2="30" y2="20" stroke="#F8F5EF" strokeWidth="2" />
-  
-  <!-- Marcas de equilíbrio -->
-  <circle cx="10" cy="20" r="2" fill="#B89035" />
-  <circle cx="30" cy="20" r="2" fill="#B89035" />
-  
-  <!-- Linha central do livro -->
-  <line x1="20" y1="10" x2="20" y2="30" stroke="#F8F5EF" strokeWidth="2" />
-  
-  <!-- Páginas simplificadas -->
-  <path d="M14 12C14 11.4477 14.4477 11 15 11H20V29H15C14.4477 29 14 28.5523 14 28V12Z" fill="#FEFEFE" stroke="#F8F5EF" strokeWidth="0.5" />
-  <path d="M26 12C26 11.4477 25.5523 11 25 11H20V29H25C25.5523 29 26 28.5523 26 28V12Z" fill="#FEFEFE" stroke="#F8F5EF" strokeWidth="0.5" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <g fill="#1D3C34">
+    <path d="M400 142c-158.5 0-286.9 128.4-286.9 286.9 0 158.5 128.4 286.9 286.9 286.9s286.9-128.4 286.9-286.9C686.9 270.4 558.5 142 400 142zm0 524.6c-131 0-237.7-106.6-237.7-237.7 0-131 106.6-237.7 237.7-237.7 131 0 237.7 106.6 237.7 237.7 0 131-106.7 237.7-237.7 237.7z"/>
+    <path d="M208.7 370.5h382.6v59H208.7z"/>
+    <path d="M400 370.5c-32.6 0-59 26.4-59 59h118c0-32.6-26.4-59-59-59z"/>
+    <ellipse cx="400" cy="488.5" rx="59" ry="59"/>
+    <path d="M400 192.9c-32.6 0-59 26.4-59 59h118c0-32.6-26.4-59-59-59zM282 311.5c-32.6 0-59 26.4-59 59h118c0-32.6-26.4-59-59-59zM518 311.5c-32.6 0-59 26.4-59 59h118c0-32.6-26.4-59-59-59z"/>
+  </g>
 </svg> 
