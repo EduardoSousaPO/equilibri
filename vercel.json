@@ -1,0 +1,11 @@
+{
+  "buildCommand": "npm run build",
+  "cleanUrls": true,
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  }
+} 
