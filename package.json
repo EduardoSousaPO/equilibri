@@ -9,6 +9,7 @@
     "test:watch": "jest --watch"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^9.0.0",
     "@fontsource/inter": "^5.2.5",
     "@fontsource/lexend": "^5.2.6",
     "@testing-library/jest-dom": "^6.6.3",
@@ -30,12 +31,14 @@
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
     "@web-std/file": "^3.0.3",
+    "clsx": "^2.1.0",
     "date-fns": "^4.1.0",
     "mercadopago": "^2.5.0",
     "next": "^15.3.1",
     "openai": "^4.96.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "svix": "^1.64.1"
+    "svix": "^1.64.1",
+    "tailwind-merge": "^2.4.0"
   }
 }
