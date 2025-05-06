@@ -55,9 +55,15 @@ export async function analyzeJournalEntry(content: string) {
 // Função para transcrever e analisar áudio
 export async function transcribeAndAnalyzeAudio(audioBlob: Blob) {
   try {
+    // Converter Blob para File (que tem as propriedades lastModified e name necessárias)
+    const audioFile = new File([audioBlob], 'audio.mp3', { 
+      type: audioBlob.type || 'audio/mp3', 
+      lastModified: Date.now() 
+    });
+    
     // Transcrever o áudio
     const transcription = await openai.audio.transcriptions.create({
-      file: audioBlob,
+      file: audioFile,
       model: "whisper-1",
       language: "pt",
       response_format: "text"
