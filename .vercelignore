@@ -1,0 +1,17 @@
+.git
+node_modules
+npm-debug.log
+.env
+.env.local
+.DS_Store
+.next
+*.log
+__tests__
+coverage
+jest.config.js
+jest.setup.js
+package-lock.json
+node_modules/.cache
+.vercel
+test
+tests 
