@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useMediaQuery } from '@/hooks/mediaQueryUtils';
 
 // Mock do hook useMediaQuery
 jest.mock('@/hooks/useMediaQuery', () => ({
