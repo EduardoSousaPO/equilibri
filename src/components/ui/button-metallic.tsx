@@ -1,5 +1,4 @@
-import React from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 
 const buttonMetallicVariants = cva(
@@ -26,28 +25,26 @@ const buttonMetallicVariants = cva(
   }
 );
 
-export interface ButtonMetallicProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonMetallicVariants> {
+export interface ButtonMetallicProps {
+  variant?: "default" | "silver" | "outline" | "ghost";
+  size?: "default" | "sm" | "lg" | "icon";
+  className?: string;
   asChild?: boolean;
+  [key: string]: any;
 }
 
-// Definimos explicitamente os tipos para variant e size como auxiliares para o TypeScript
-type ButtonVariant = NonNullable<VariantProps<typeof buttonMetallicVariants>["variant"]>;
-type ButtonSize = NonNullable<VariantProps<typeof buttonMetallicVariants>["size"]>;
+export function ButtonMetallic({ 
+  className = "", 
+  variant = "default", 
+  size = "default", 
+  ...props 
+}: ButtonMetallicProps) {
+  return (
+    <button
+      className={cn(buttonMetallicVariants({ variant, size, className }))}
+      {...props}
+    />
+  );
+}
 
-const ButtonMetallic = React.forwardRef<HTMLButtonElement, ButtonMetallicProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    return (
-      <button
-        className={cn(buttonMetallicVariants({ variant, size, className }))}
-        ref={ref}
-        {...props}
-      />
-    );
-  }
-);
-
-ButtonMetallic.displayName = "ButtonMetallic";
-
-export { ButtonMetallic, buttonMetallicVariants }; 
+export { buttonMetallicVariants }; 

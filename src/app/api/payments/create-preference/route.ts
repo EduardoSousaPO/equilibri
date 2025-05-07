@@ -1,12 +1,13 @@
-import mercadopago from 'mercadopago';
+import { MercadoPagoConfig, Preference } from 'mercadopago';
 import { NextRequest, NextResponse } from 'next/server';
 import { createRouteClient } from '@/lib/supabase/server';
 
 // Configurar SDK do Mercado Pago
-// @ts-ignore - Ignorando erros de tipo para o SDK do Mercado Pago
-mercadopago.configure({
-  access_token: process.env.MERCADO_PAGO_ACCESS_TOKEN || ''
+const mercadopago = new MercadoPagoConfig({
+  accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN || ''
 });
+
+const preference = new Preference(mercadopago);
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
       .single();
     
     // Criar preferência de pagamento
-    const preference = {
+    const preferenceData = {
       items: [
         {
           id: preference_data.id || 'premium_monthly',
@@ -70,23 +71,22 @@ export async function POST(request: NextRequest) {
       }
     };
     
-    // @ts-ignore - Ignorando erros de tipo para o SDK do Mercado Pago
-    const response = await mercadopago.preferences.create(preference);
+    const response = await preference.create({ body: preferenceData });
     
     // Registrar a tentativa de pagamento
     await supabase
       .from('payment_attempts')
       .insert({
         user_id: user.id,
-        preference_id: response.body.id,
+        preference_id: response.id,
         amount: preference_data.price || 39.90,
         status: 'pending'
       });
     
     return NextResponse.json({
-      id: response.body.id,
-      init_point: response.body.init_point,
-      sandbox_init_point: response.body.sandbox_init_point
+      id: response.id,
+      init_point: response.init_point,
+      sandbox_init_point: response.sandbox_init_point
     });
   } catch (error) {
     console.error('Error creating payment preference:', error);

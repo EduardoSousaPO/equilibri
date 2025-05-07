@@ -1,11 +1,10 @@
-import mercadopago from 'mercadopago';
+import { MercadoPagoConfig } from 'mercadopago';
 import { NextRequest, NextResponse } from 'next/server';
 import { createRouteClient } from '@/lib/supabase/server';
 
 // Configurar SDK do Mercado Pago
-// @ts-ignore - Ignorando erros de tipo para o SDK do Mercado Pago
-mercadopago.configure({
-  access_token: process.env.MERCADO_PAGO_ACCESS_TOKEN || ''
+const mercadopago = new MercadoPagoConfig({
+  accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN || ''
 });
 
 export async function GET(request: NextRequest) {

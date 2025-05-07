@@ -8,9 +8,9 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: '/equilibri-icon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico', sizes: 'any' }
+      { url: '/favicon.svg', sizes: 'any' }
     ],
-    apple: { url: '/equilibri-logo.svg', type: 'image/svg+xml' }
+    apple: { url: '/equilibri-logo.png', type: 'image/png' }
   }
 }
 

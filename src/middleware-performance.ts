@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 // Middleware para otimização de desempenho e segurança
-export function middleware(request) {
-  // Adicionar cabeçalhos de cache para recursos estáticos
+export function middleware(request: NextRequest) {
+  // Criar resposta
   const response = NextResponse.next();
   
   // Definir cabeçalhos de cache para recursos estáticos
@@ -18,10 +19,11 @@ export function middleware(request) {
     url.endsWith('.css') ||
     url.endsWith('.js')
   ) {
+    // Usar Headers API para manipular cabeçalhos
     response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
   }
   
-  // Adicionar cabeçalhos de segurança
+  // Adicionar cabeçalhos de segurança usando Headers API
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-XSS-Protection', '1; mode=block');

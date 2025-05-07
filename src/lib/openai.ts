@@ -1,14 +1,43 @@
 import OpenAI from 'openai';
 
-// Inicializar cliente OpenAI
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+// Inicializar cliente OpenAI com verificação de ambiente
+let openai: OpenAI;
+
+// Função para garantir que o cliente só seja inicializado em ambiente de execução
+const getOpenAIClient = () => {
+  if (!openai) {
+    // Verificar se a chave da API está disponível
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      console.warn('OPENAI_API_KEY não encontrada no ambiente');
+    }
+
+    openai = new OpenAI({
+      apiKey: apiKey || 'dummy-key-for-build'
+    });
+  }
+  return openai;
+};
 
 // Função para analisar texto de diário
 export async function analyzeJournalEntry(content: string) {
   try {
-    const completion = await openai.chat.completions.create({
+    const client = getOpenAIClient();
+    if (!process.env.OPENAI_API_KEY) {
+      return {
+        error: "API key não configurada",
+        emotions: [],
+        primaryEmotion: "",
+        emotionIntensity: 0,
+        cognitiveDistortions: [],
+        patterns: [],
+        techniques: [],
+        perspective: "",
+        summary: "Não foi possível analisar o conteúdo devido à falta de configuração da API"
+      };
+    }
+
+    const completion = await client.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -48,13 +77,41 @@ export async function analyzeJournalEntry(content: string) {
     return JSON.parse(completion.choices[0].message.content || '{}');
   } catch (error) {
     console.error('Error analyzing journal entry:', error);
-    throw new Error('Falha ao analisar entrada de diário');
+    return {
+      error: "Falha ao analisar entrada de diário",
+      emotions: [],
+      primaryEmotion: "",
+      emotionIntensity: 0,
+      cognitiveDistortions: [],
+      patterns: [],
+      techniques: [],
+      perspective: "",
+      summary: "Ocorreu um erro ao analisar o conteúdo"
+    };
   }
 }
 
 // Função para transcrever e analisar áudio
 export async function transcribeAndAnalyzeAudio(audioBlob: Blob) {
   try {
+    const client = getOpenAIClient();
+    if (!process.env.OPENAI_API_KEY) {
+      return {
+        error: "API key não configurada",
+        transcription: "",
+        analysis: {
+          emotions: [],
+          primaryEmotion: "",
+          emotionIntensity: 0,
+          cognitiveDistortions: [],
+          patterns: [],
+          techniques: [],
+          perspective: "",
+          summary: "Não foi possível analisar o conteúdo devido à falta de configuração da API"
+        }
+      };
+    }
+
     // Converter Blob para File (que tem as propriedades lastModified e name necessárias)
     const audioFile = new File([audioBlob], 'audio.mp3', { 
       type: audioBlob.type || 'audio/mp3', 
@@ -62,7 +119,7 @@ export async function transcribeAndAnalyzeAudio(audioBlob: Blob) {
     });
     
     // Transcrever o áudio
-    const transcription = await openai.audio.transcriptions.create({
+    const transcription = await client.audio.transcriptions.create({
       file: audioFile,
       model: "whisper-1",
       language: "pt",
@@ -78,13 +135,40 @@ export async function transcribeAndAnalyzeAudio(audioBlob: Blob) {
     };
   } catch (error) {
     console.error('Error transcribing and analyzing audio:', error);
-    throw new Error('Falha ao transcrever e analisar áudio');
+    return {
+      error: "Falha ao transcrever e analisar áudio",
+      transcription: "",
+      analysis: {
+        emotions: [],
+        primaryEmotion: "",
+        emotionIntensity: 0,
+        cognitiveDistortions: [],
+        patterns: [],
+        techniques: [],
+        perspective: "",
+        summary: "Ocorreu um erro ao processar o áudio"
+      }
+    };
   }
 }
 
 // Função para gerar relatório semanal
 export async function generateWeeklyReport(journalEntries: any[], audioEntries: any[], emotionCheckins: any[]) {
   try {
+    const client = getOpenAIClient();
+    if (!process.env.OPENAI_API_KEY) {
+      return {
+        error: "API key não configurada",
+        emotionalPatterns: [],
+        commonTriggers: [],
+        progress: "",
+        challenges: [],
+        recommendations: [],
+        techniques: [],
+        summary: "Não foi possível gerar o relatório devido à falta de configuração da API"
+      };
+    }
+
     // Preparar dados para o prompt
     const journalSummaries = journalEntries.map(entry => {
       return `Data: ${new Date(entry.created_at).toLocaleDateString('pt-BR')}
@@ -134,7 +218,7 @@ Nota: ${checkin.note || 'Sem nota'}`;
     const averageMood = moodEntries > 0 ? totalMoodScore / moodEntries : null;
     
     // Gerar relatório com OpenAI
-    const completion = await openai.chat.completions.create({
+    const completion = await client.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -190,20 +274,39 @@ Nota: ${checkin.note || 'Sem nota'}`;
     return JSON.parse(completion.choices[0].message.content || '{}');
   } catch (error) {
     console.error('Error generating weekly report:', error);
-    throw new Error('Falha ao gerar relatório semanal');
+    return {
+      error: "Falha ao gerar relatório semanal",
+      emotionalPatterns: [],
+      commonTriggers: [],
+      progress: "",
+      challenges: [],
+      recommendations: [],
+      techniques: [],
+      summary: "Ocorreu um erro ao gerar o relatório"
+    };
   }
 }
 
 // Função para recomendar técnicas terapêuticas
 export async function recommendTherapyTechniques(userHistory: any) {
   try {
+    const client = getOpenAIClient();
+    if (!process.env.OPENAI_API_KEY) {
+      return {
+        error: "API key não configurada",
+        recommendedTechniques: [],
+        priorityOrder: [],
+        explanation: "Não foi possível recomendar técnicas devido à falta de configuração da API"
+      };
+    }
+
     // Extrair informações relevantes do histórico do usuário
     const recentEmotions = userHistory.recentEmotions || [];
     const recentPatterns = userHistory.recentPatterns || [];
     const previousTechniques = userHistory.previousTechniques || [];
     
     // Gerar recomendações com OpenAI
-    const completion = await openai.chat.completions.create({
+    const completion = await client.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -243,6 +346,11 @@ export async function recommendTherapyTechniques(userHistory: any) {
     return JSON.parse(completion.choices[0].message.content || '{}');
   } catch (error) {
     console.error('Error recommending therapy techniques:', error);
-    throw new Error('Falha ao recomendar técnicas terapêuticas');
+    return {
+      error: "Falha ao recomendar técnicas terapêuticas",
+      recommendedTechniques: [],
+      priorityOrder: [],
+      explanation: "Ocorreu um erro ao processar as recomendações"
+    };
   }
 }

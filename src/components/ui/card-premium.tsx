@@ -1,8 +1,9 @@
-import React from 'react';
 import { cn } from '@/utils/cn';
 
-interface CardPremiumProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
+interface CardPremiumProps {
+  className?: string;
+  children: any;
+  [key: string]: any;
 }
 
 export function CardPremium({ className = "", children, ...props }: CardPremiumProps) {
@@ -19,8 +20,10 @@ export function CardPremium({ className = "", children, ...props }: CardPremiumP
   );
 }
 
-interface CardPremiumHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
+interface CardPremiumHeaderProps {
+  className?: string;
+  children: any;
+  [key: string]: any;
 }
 
 export function CardPremiumHeader({ className = "", children, ...props }: CardPremiumHeaderProps) {
@@ -37,8 +40,10 @@ export function CardPremiumHeader({ className = "", children, ...props }: CardPr
   );
 }
 
-interface CardPremiumTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
-  children: React.ReactNode;
+interface CardPremiumTitleProps {
+  className?: string;
+  children: any;
+  [key: string]: any;
 }
 
 export function CardPremiumTitle({ className = "", children, ...props }: CardPremiumTitleProps) {
@@ -55,8 +60,10 @@ export function CardPremiumTitle({ className = "", children, ...props }: CardPre
   );
 }
 
-interface CardPremiumContentProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
+interface CardPremiumContentProps {
+  className?: string;
+  children: any;
+  [key: string]: any;
 }
 
 export function CardPremiumContent({ className = "", children, ...props }: CardPremiumContentProps) {
@@ -67,8 +74,10 @@ export function CardPremiumContent({ className = "", children, ...props }: CardP
   );
 }
 
-interface CardPremiumFooterProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
+interface CardPremiumFooterProps {
+  className?: string;
+  children: any;
+  [key: string]: any;
 }
 
 export function CardPremiumFooter({ className = "", children, ...props }: CardPremiumFooterProps) {

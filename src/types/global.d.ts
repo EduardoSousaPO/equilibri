@@ -23,6 +23,8 @@ declare global {
       NEXT_PUBLIC_SUPABASE_URL: string;
       NEXT_PUBLIC_SUPABASE_ANON_KEY: string;
       MERCADO_PAGO_ACCESS_TOKEN: string;
+      NEXT_PUBLIC_APP_URL: string;
+      OPENAI_API_KEY: string;
     }
   }
 } 
