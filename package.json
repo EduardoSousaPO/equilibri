@@ -5,7 +5,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build --no-lint --no-minify",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
