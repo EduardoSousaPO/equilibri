@@ -9,6 +9,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        brand: '#6FA590',        
+        brandSecondary: '#8AA1B1',
         border: 'var(--border)',
         input: 'var(--input)',
         ring: 'var(--ring)',

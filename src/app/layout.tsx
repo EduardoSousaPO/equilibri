@@ -3,14 +3,14 @@ import './theme.css'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Equilibri - AI Diary & Insight',
-  description: 'Transforme seus pensamentos em insights terapêuticos com o Equilibri - AI Diary & Insight',
+  title: 'Equilibri.IA - Seu terapeuta digital com um toque humano',
+  description: 'Transforme seus pensamentos em insights terapêuticos com a Equilibri.IA - Seu terapeuta digital com um toque humano',
   icons: {
     icon: [
-      { url: '/equilibri-icon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.svg', sizes: 'any' }
+      { url: '/favicon.svg', sizes: 'any' },
+      { url: '/logo.svg', type: 'image/svg+xml' }
     ],
-    apple: { url: '/equilibri-logo.png', type: 'image/png' }
+    apple: { url: '/logo.svg', type: 'image/svg+xml' }
   }
 }
 
