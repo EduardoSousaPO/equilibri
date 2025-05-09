@@ -68,8 +68,8 @@ export function RegisterForm() {
   return (
     <div className="w-full max-w-md space-y-6">
       <div className="text-center">
-        <h1 className="text-2xl font-bold">Criar conta</h1>
-        <p className="text-gray-600">Preencha os dados para criar sua conta</p>
+        <h1 className="text-2xl font-bold text-primary">Criar conta no Equilibri.IA</h1>
+        <p className="text-text-secondary">Preencha os dados para começar sua jornada terapêutica</p>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -80,7 +80,7 @@ export function RegisterForm() {
         )}
         
         <div className="space-y-2">
-          <label htmlFor="name" className="block text-sm font-medium">
+          <label htmlFor="name" className="block text-sm font-medium text-text-primary">
             Nome completo
           </label>
           <input
@@ -89,13 +89,13 @@ export function RegisterForm() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white"
             placeholder="Seu nome"
           />
         </div>
         
         <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium">
+          <label htmlFor="email" className="block text-sm font-medium text-text-primary">
             Email
           </label>
           <input
@@ -104,13 +104,13 @@ export function RegisterForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white"
             placeholder="seu@email.com"
           />
         </div>
         
         <div className="space-y-2">
-          <label htmlFor="password" className="block text-sm font-medium">
+          <label htmlFor="password" className="block text-sm font-medium text-text-primary">
             Senha
           </label>
           <input
@@ -119,13 +119,13 @@ export function RegisterForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white"
             placeholder="••••••••"
           />
         </div>
         
         <div className="space-y-2">
-          <label htmlFor="passwordConfirm" className="block text-sm font-medium">
+          <label htmlFor="passwordConfirm" className="block text-sm font-medium text-text-primary">
             Confirmar senha
           </label>
           <input
@@ -134,18 +134,18 @@ export function RegisterForm() {
             value={passwordConfirm}
             onChange={(e) => setPasswordConfirm(e.target.value)}
             required
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white"
             placeholder="••••••••"
           />
         </div>
         
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-text-secondary">
           Ao se cadastrar, você concorda com nossos{' '}
-          <Link href="/terms" className="text-blue-600 hover:underline">
+          <Link href="/terms" className="text-primary hover:underline">
             Termos de Serviço
           </Link>{' '}
           e{' '}
-          <Link href="/privacy" className="text-blue-600 hover:underline">
+          <Link href="/privacy" className="text-primary hover:underline">
             Política de Privacidade
           </Link>
           .
@@ -154,16 +154,16 @@ export function RegisterForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full py-2 px-4 bg-primary text-white rounded-md hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isLoading ? 'Criando conta...' : 'Criar conta'}
         </button>
       </form>
       
       <div className="text-center">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-text-secondary">
           Já tem uma conta?{' '}
-          <Link href="/login" className="text-blue-600 hover:underline">
+          <Link href="/login" className="text-primary hover:underline">
             Faça login
           </Link>
         </p>

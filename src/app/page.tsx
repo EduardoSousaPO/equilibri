@@ -7,12 +7,19 @@ import { EquilibriLogo } from '@/components/ui/logo'
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
+      {/* Banner da nova funcionalidade */}
+      <div className="bg-brand text-white p-3 text-center">
+        <p className="font-medium">
+          🎉 <span className="font-bold">Novidade:</span> Conheça Lari, sua nova terapeuta digital! <a href="/chat" className="underline font-semibold hover:text-brandSecondary transition-colors">Inicie uma conversa agora</a>
+        </p>
+      </div>
+      
       {/* Navbar mais minimalista */}
       <header className="bg-primary shadow-sm text-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex-shrink-0 flex items-center">
-              <EquilibriLogo className="h-10 w-auto" />
+              <EquilibriLogo className="h-9" textColor="text-background" />
             </div>
             <div className="hidden md:ml-6 md:flex md:space-x-8">
               <Link href="#features" className="inline-flex items-center px-1 pt-1 text-sm font-medium text-background hover:text-accent-light transition-colors">
@@ -52,16 +59,108 @@ export default function HomePage() {
                 <Link href="/register" className="px-8 py-3 border border-transparent text-base font-medium rounded-md text-background bg-primary hover:bg-primary-light md:py-4 md:text-lg md:px-10 transition-colors">
                   Comece seu diário
                 </Link>
-                <Link href="#how-it-works" className="px-8 py-3 border border-transparent text-base font-medium rounded-md text-primary bg-accent hover:opacity-90 md:py-4 md:text-lg md:px-10 transition-colors">
-                  Saiba mais
+                <Link href="/chat" className="px-8 py-3 border border-transparent text-base font-medium rounded-md text-primary bg-accent hover:opacity-90 md:py-4 md:text-lg md:px-10 transition-colors">
+                  Converse com Lari
                 </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Seção de destaque para Lari */}
+        <div className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="lg:flex lg:items-center lg:justify-between">
+              <div className="lg:w-1/2 mb-10 lg:mb-0">
+                <h2 className="text-base font-semibold text-brand tracking-wide uppercase">NOVIDADE EXCLUSIVA</h2>
+                <p className="mt-2 text-3xl font-georgia font-bold text-primary sm:text-4xl">
+                  Conheça Lari, sua terapeuta digital
+                </p>
+                <p className="mt-4 text-lg text-text-primary">
+                  Lari é uma inteligência artificial especializada em apoio terapêutico, desenvolvida para oferecer suporte emocional e insights terapêuticos com um toque humano.
+                </p>
+                <ul className="mt-6 space-y-3">
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-6 w-6 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <p className="ml-3 text-text-primary">Especialista em TCC, ACT, DBT e logoterapia</p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-6 w-6 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <p className="ml-3 text-text-primary">Conversa empática e acolhedora</p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-6 w-6 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <p className="ml-3 text-text-primary">Perguntas reflexivas que estimulam autoconhecimento</p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-6 w-6 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <p className="ml-3 text-text-primary">Disponível 24/7 para apoio emocional</p>
+                  </li>
+                </ul>
+                <div className="mt-8">
+                  <Link href="/chat" className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-brand hover:bg-brand/90 transition-colors">
+                    Iniciar conversa com Lari
+                    <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 -mr-1 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </Link>
+                </div>
+              </div>
+              <div className="lg:w-5/12">
+                <div className="bg-brand/10 rounded-xl p-6 border border-brand/20 shadow-lg max-w-md mx-auto lg:mx-0">
+                  <div className="flex items-center mb-4">
+                    <div className="h-12 w-12 rounded-full bg-brand/20 flex items-center justify-center">
+                      <span className="text-brand text-xl font-medium">L</span>
+                    </div>
+                    <div className="ml-4">
+                      <h3 className="font-medium text-primary text-lg">Lari</h3>
+                      <p className="text-text-secondary text-sm">Terapeuta Digital</p>
+                    </div>
+                  </div>
+                  <div className="rounded-lg bg-white p-4 shadow-sm">
+                    <p className="text-text-primary text-sm">
+                      Olá! Sou Lari, sua terapeuta virtual. Como posso ajudar você hoje? Estou aqui para conversar sobre qualquer coisa que esteja em sua mente.
+                    </p>
+                  </div>
+                  <div className="mt-4 flex">
+                    <div className="bg-background-secondary rounded-lg p-3 flex-1 text-sm">
+                      <p className="text-text-secondary">Digite sua mensagem aqui...</p>
+                    </div>
+                    <button className="ml-2 rounded-full bg-brand/20 p-3 text-brand hover:bg-brand/30 transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="mt-4 text-center">
+                    <Link href="/chat" className="text-brand text-sm hover:underline">
+                      Iniciar conversa completa →
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Features Section com aparência mais minimalista */}
-        <div id="features" className="py-20 bg-white overflow-hidden">
+        <div id="features" className="py-20 bg-background-secondary overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <h2 className="text-base font-semibold text-accent tracking-wide uppercase">FUNCIONALIDADES</h2>
@@ -201,7 +300,7 @@ export default function HomePage() {
                     Desenvolve habilidades para regulação emocional, tolerância ao desconforto, efetividade interpessoal e consciência plena.
                   </p>
                   <p className="mt-4 text-sm text-text-secondary">
-                    <strong>Aplicação no Equilibri:</strong> Sugestão de técnicas de autorregulação emocional, estratégias de tolerância ao estresse e práticas de mindfulness adaptadas às necessidades específicas.
+                    <strong>Aplicação no Equilibri.IA:</strong> Sugestão de técnicas de autorregulação emocional, estratégias de tolerância ao estresse e práticas de mindfulness adaptadas às necessidades específicas.
                   </p>
                 </div>
               </div>
@@ -352,7 +451,7 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between">
             <h2 className="text-3xl font-bold tracking-tight text-background sm:text-4xl">
               <span className="block">Pronto para começar sua jornada?</span>
-              <span className="block text-accent-light">Comece a usar o Equilibri hoje mesmo.</span>
+              <span className="block text-accent-light">Comece a usar o Equilibri.IA hoje mesmo.</span>
             </h2>
             <div className="mt-8 flex lg:mt-0 lg:flex-shrink-0 gap-4">
               <Link href="/register" className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-primary bg-accent hover:opacity-90 transition-colors">
@@ -371,9 +470,9 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             <div>
-              <EquilibriLogo className="h-8 w-auto" />
+              <EquilibriLogo className="h-6" textColor="text-text-secondary" />
               <p className="mt-2 text-sm text-text-secondary">
-                &copy; {new Date().getFullYear()} Equilibri. Todos os direitos reservados.
+                &copy; {new Date().getFullYear()} Equilibri.IA. Todos os direitos reservados.
               </p>
             </div>
             <div className="flex space-x-6">

@@ -15,35 +15,55 @@ export const IconLogo = ({ className = "w-8 h-8" }: { className?: string }) => {
   )
 }
 
-// Nova logo Equilibri usando a imagem estática
-export const EquilibriLogo = ({ className = 'h-12 w-auto' }: { className?: string }) => {
+// Logo Equilibri com o texto Equilibri.IA
+export const EquilibriLogo = ({ 
+  className = 'h-10 w-auto', 
+  showText = true,
+  textColor = "text-primary" 
+}: { 
+  className?: string,
+  showText?: boolean,
+  textColor?: string 
+}) => {
+  // Extrair apenas a altura da classe para calcular proporções
+  const heightMatch = className?.match(/h-(\d+)/);
+  const height = heightMatch ? parseInt(heightMatch[1]) : 10; // Valor padrão se não encontrar
+  
+  // Ajustar o tamanho do texto com base na altura do logo
+  const textSize = height >= 16 ? 'text-lg' : height >= 10 ? 'text-base' : 'text-sm';
+  
   return (
-    <div className={`relative ${className}`}>
-      <Image
-        src="/equilibri-logo.png"
-        alt="Equilibri Logo"
-        width={220}
-        height={220}
-        className="w-auto h-full object-contain"
-      />
-      <div className="mt-2 text-center">
-        <h2 className="text-forest-900 font-serif font-bold text-2xl tracking-wider">Equilibri</h2>
-        <p className="text-xs text-gray-600 tracking-wide">DIÁRIO TERAPÊUTICO DIGITAL</p>
+    <div className={`flex items-center ${className}`}>
+      <div className="flex-shrink-0 relative" style={{ maxHeight: `${height * 4}px` }}>
+        <Image
+          src="/equilibri-logo.png"
+          alt="Equilibri.IA Logo"
+          width={height * 2}
+          height={height * 2}
+          className="w-auto h-full object-contain"
+          priority
+        />
       </div>
+      {showText && (
+        <div className="ml-2">
+          <span className={`font-semibold ${textSize} ${textColor}`}>Equilibri.IA</span>
+        </div>
+      )}
     </div>
   )
 }
 
-// Novo ícone Equilibri usando a imagem estática
+// Ícone Equilibri usando a imagem estática
 export const EquilibriIcon = ({ className = 'h-10 w-10' }: { className?: string }) => {
   return (
-    <div className={`${className} relative`}>
+    <div className={`${className}`}>
       <Image
         src="/equilibri-icon.svg"
-        alt="Equilibri Icon"
-        width={100}
-        height={100}
+        alt="Equilibri.IA Icon"
+        width={40}
+        height={40}
         className="w-full h-full object-contain"
+        priority
       />
     </div>
   )

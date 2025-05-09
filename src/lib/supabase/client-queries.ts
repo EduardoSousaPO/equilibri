@@ -5,7 +5,7 @@ import { Database } from '@/types/supabase'
 import { JournalEntryInsert, AudioEntryInsert, EmotionCheckinInsert, TherapyGoalInsert, UserSettingsUpdate } from '@/types/database'
 
 export function createClientSupabaseClient() {
-  return createBrowserClient<Database>(
+  return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
@@ -253,6 +253,7 @@ export async function createAudioEntry(entry: AudioEntryInsert) {
   const supabase = createClientSupabaseClient()
   
   try {
+    // Inserir registro na tabela de entradas de áudio
     const { data, error } = await supabase
       .from('audio_entries')
       .insert(entry)
@@ -295,12 +296,32 @@ export async function deleteAudioEntry(id: string) {
   const supabase = createClientSupabaseClient()
   
   try {
+    // Obter informações da entrada de áudio para possível exclusão do arquivo
+    const { data: audioEntry } = await supabase
+      .from('audio_entries')
+      .select('file_path')
+      .eq('id', id)
+      .single()
+    
+    // Excluir o registro da tabela
     const { error } = await supabase
       .from('audio_entries')
       .delete()
       .eq('id', id)
     
     if (error) throw error
+    
+    // Se houver caminho de arquivo, tentar excluir o arquivo do storage
+    if (audioEntry?.file_path) {
+      try {
+        await supabase.storage
+          .from('audiouploads')
+          .remove([audioEntry.file_path])
+      } catch (storageError) {
+        // Apenas logar erro, não impedir a exclusão do registro
+        console.warn('Erro ao excluir arquivo de áudio:', storageError)
+      }
+    }
     
     return { error: null }
   } catch (error) {
@@ -329,19 +350,10 @@ export async function uploadAudio(file: File, userId: string) {
     const fileName = `${userId}/${Date.now()}.${fileExt}`
     const filePath = `audio/${fileName}`
     
-    // Verificar se o bucket existe
-    const { data: buckets } = await supabase.storage.listBuckets()
-    const audioBucketExists = buckets?.some(b => b.name === 'audio_uploads')
-    
-    if (!audioBucketExists) {
-      console.error('Bucket audio_uploads não existe')
-      return { data: null, error: 'Erro de configuração de armazenamento' }
-    }
-    
     // Fazer upload do arquivo
     const { data, error } = await supabase
       .storage
-      .from('audio_uploads')
+      .from('audiouploads')
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: false
@@ -359,7 +371,7 @@ export async function uploadAudio(file: File, userId: string) {
     // Obter URL pública
     const { data: { publicUrl } } = supabase
       .storage
-      .from('audio_uploads')
+      .from('audiouploads')
       .getPublicUrl(filePath)
     
     if (!publicUrl) {

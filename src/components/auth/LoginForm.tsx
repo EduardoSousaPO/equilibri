@@ -41,8 +41,8 @@ export function LoginForm() {
   return (
     <div className="w-full max-w-md space-y-6">
       <div className="text-center">
-        <h1 className="text-2xl font-bold">Login</h1>
-        <p className="text-gray-600">Faça login para continuar</p>
+        <h1 className="text-2xl font-bold text-primary">Acesse o Equilibri.IA</h1>
+        <p className="text-text-secondary">Faça login para continuar sua jornada terapêutica</p>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -53,7 +53,7 @@ export function LoginForm() {
         )}
         
         <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium">
+          <label htmlFor="email" className="block text-sm font-medium text-text-primary">
             Email
           </label>
           <input
@@ -62,17 +62,17 @@ export function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white"
             placeholder="seu@email.com"
           />
         </div>
         
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label htmlFor="password" className="block text-sm font-medium">
+            <label htmlFor="password" className="block text-sm font-medium text-text-primary">
               Senha
             </label>
-            <Link href="/auth/reset-password" className="text-sm text-blue-600 hover:underline">
+            <Link href="/auth/reset-password" className="text-sm text-primary hover:underline">
               Esqueceu a senha?
             </Link>
           </div>
@@ -82,7 +82,7 @@ export function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white"
             placeholder="••••••••"
           />
         </div>
@@ -90,16 +90,16 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full py-2 px-4 bg-primary text-white rounded-md hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isLoading ? 'Entrando...' : 'Entrar'}
         </button>
       </form>
       
       <div className="text-center">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-text-secondary">
           Não tem uma conta?{' '}
-          <Link href="/register" className="text-blue-600 hover:underline">
+          <Link href="/register" className="text-primary hover:underline">
             Cadastre-se
           </Link>
         </p>

@@ -73,40 +73,72 @@ export default function JournalPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold font-georgia text-teal-900">Meu Diário</h1>
-        <Link 
-          href="/app/journal/new" 
-          className="inline-flex items-center px-5 py-2.5 rounded-xl font-medium shadow-md text-white bg-teal-900 hover:bg-teal-800 border border-gold-500/20 transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:ring-offset-2"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M10 3a1 1 0 00-1 1v5H4a1 1 0 100 2h5v5a1 1 0 102 0v-5h5a1 1 0 100-2h-5V4a1 1 0 00-1-1z" clipRule="evenodd" />
-          </svg>
-          Nova Entrada
-        </Link>
+        <h1 className="text-3xl font-bold font-georgia text-primary">Meu Diário</h1>
+        <div className="flex gap-2">
+          <Link href="/app/chat" className="inline-flex items-center px-4 py-2.5 rounded-xl font-medium shadow-sm text-brand bg-brand/10 hover:bg-brand/20 border border-brand/20 transition-all duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+            Conversar com Lari
+          </Link>
+          <Link 
+            href="/app/journal/new" 
+            className="inline-flex items-center px-5 py-2.5 rounded-xl font-medium shadow-md text-white bg-brand hover:bg-brand/90 border border-brand/20 transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 3a1 1 0 00-1 1v5H4a1 1 0 100 2h5v5a1 1 0 102 0v-5h5a1 1 0 100-2h-5V4a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            Nova Entrada
+          </Link>
+        </div>
+      </div>
+      
+      <div className="bg-white rounded-xl p-4 shadow-sm border border-brand/20 text-text-primary">
+        <div className="flex items-start">
+          <div className="h-10 w-10 rounded-full bg-brand/20 flex-shrink-0 flex items-center justify-center text-brand">
+            <span className="font-medium">L</span>
+          </div>
+          <div className="ml-4">
+            <p className="font-medium text-primary">Dica da Lari</p>
+            <p className="mt-1 text-sm">
+              Escrever regularmente no diário ajuda a organizar pensamentos e processar emoções. 
+              Tente registrar não apenas os eventos, mas também como você se sentiu e o que pensou sobre eles.
+            </p>
+          </div>
+        </div>
       </div>
       
       {loading ? (
         <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-cream-100 border-t-teal-900"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-background-secondary border-t-brand"></div>
         </div>
       ) : entries.length === 0 ? (
-        <div className="bg-white rounded-xl p-10 shadow-md border border-gold-500/10 text-center">
-          <div className="mx-auto h-24 w-24 text-teal-800 opacity-80">
+        <div className="bg-white rounded-xl p-10 shadow-md border border-brand/10 text-center">
+          <div className="mx-auto h-24 w-24 text-brand opacity-80">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
             </svg>
           </div>
-          <h3 className="mt-4 text-xl font-bold font-georgia text-teal-900">Nenhuma entrada encontrada</h3>
-          <p className="mt-2 text-teal-800 opacity-80">Comece criando sua primeira entrada no diário.</p>
-          <div className="mt-6">
+          <h3 className="mt-4 text-xl font-bold font-georgia text-primary">Nenhuma entrada encontrada</h3>
+          <p className="mt-2 text-text-primary opacity-80">Comece criando sua primeira entrada no diário.</p>
+          <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/app/journal/new"
-              className="inline-flex items-center px-5 py-2.5 rounded-xl font-medium shadow-md text-white bg-teal-900 hover:bg-teal-800 border border-gold-500/20 transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:ring-offset-2"
+              className="inline-flex items-center px-5 py-2.5 rounded-xl font-medium shadow-md text-white bg-brand hover:bg-brand/90 border border-brand/20 transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 3a1 1 0 00-1 1v5H4a1 1 0 100 2h5v5a1 1 0 102 0v-5h5a1 1 0 100-2h-5V4a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
               Criar primeira entrada
+            </Link>
+            <Link
+              href="/app/chat"
+              className="inline-flex items-center px-5 py-2.5 rounded-xl font-medium shadow-md text-brand bg-brand/10 hover:bg-brand/20 border border-brand/20 transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+              </svg>
+              Conversar com Lari
             </Link>
           </div>
         </div>
@@ -116,13 +148,13 @@ export default function JournalPage() {
             <Link 
               key={entry.id} 
               href={`/app/journal/${entry.id}`}
-              className="block bg-white rounded-xl p-6 shadow-md border border-gold-500/10 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+              className="block bg-white rounded-xl p-6 shadow-md border border-brand/10 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-xl font-bold font-georgia text-teal-900 mb-2">{entry.title}</h2>
-                  <p className="text-teal-800 opacity-80 line-clamp-2 mb-3">{entry.content}</p>
-                  <div className="text-sm text-teal-800 opacity-70">
+                  <h2 className="text-xl font-bold font-georgia text-primary mb-2">{entry.title}</h2>
+                  <p className="text-text-primary opacity-80 line-clamp-2 mb-3">{entry.content}</p>
+                  <div className="text-sm text-text-secondary">
                     {formatDate(entry.created_at)}
                   </div>
                 </div>

@@ -1,15 +1,16 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import Link from 'next/link'
 import { createClientSupabaseClient } from '@/lib/supabase/client-queries'
 import { usePathname } from 'next/navigation'
 import { EquilibriLogo } from '@/components/ui/logo'
+import { useState, useEffect } from 'react'
 
 export default function AppLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: any
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const [user, setUser] = useState<any>(null)
@@ -73,6 +74,11 @@ export default function AppLayout({
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
       </svg>
     )},
+    { label: 'Chat com Lari', path: '/app/chat', icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+      </svg>
+    )},
     { label: 'Check-in', path: '/app/checkin', icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -108,7 +114,7 @@ export default function AppLayout({
         {/* Logo */}
         <div className="px-7 py-8 flex items-center justify-center">
           <Link href="/app/dashboard" className="block w-full">
-            <EquilibriLogo className="h-12 w-auto mx-auto hover-lift transition-transform" />
+            <EquilibriLogo className="mx-auto h-10 hover-lift transition-transform" textColor="text-primary" />
           </Link>
         </div>
         
@@ -130,6 +136,9 @@ export default function AppLayout({
                     {item.icon}
                   </span>
                   {item.label}
+                  {item.label === 'Chat com Lari' && (
+                    <span className="ml-auto px-2 py-0.5 text-xs rounded-md bg-brand/20 text-brand">Novo</span>
+                  )}
                 </Link>
               </li>
             ))}
@@ -161,8 +170,8 @@ export default function AppLayout({
       <div className="lg:hidden fixed top-0 left-0 right-0 z-20 bg-background border-b border-border py-2.5 px-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/app/dashboard">
-            <EquilibriLogo className="h-8 w-auto" />
+          <Link href="/app/dashboard" className="flex items-center">
+            <EquilibriLogo className="h-6" textColor="text-primary" />
           </Link>
           
           {/* Botão menu hambúrguer */}
@@ -202,32 +211,34 @@ export default function AppLayout({
                 </button>
               </div>
               
-              <div className="divider mb-2 opacity-60"></div>
-              
-              <nav className="space-y-1">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.path}
-                    href={item.path}
-                    className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-all duration-300 ${
-                      isActive(item.path)
-                        ? 'bg-primary-ultra-light text-primary'
-                        : 'text-text-primary hover:bg-background-secondary'
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <span className={`mr-3 transition-colors duration-300 ${isActive(item.path) ? 'text-primary' : 'text-text-secondary'}`}>
-                      {item.icon}
-                    </span>
-                    {item.label}
-                  </Link>
-                ))}
+              <nav>
+                <ul className="space-y-1">
+                  {navItems.map((item) => (
+                    <li key={item.path}>
+                      <Link
+                        href={item.path}
+                        className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-all duration-300 ${
+                          isActive(item.path)
+                            ? 'bg-primary-ultra-light text-primary'
+                            : 'text-text-primary hover:bg-background-secondary'
+                        }`}
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <span className={`mr-3 transition-colors duration-300 ${isActive(item.path) ? 'text-primary' : 'text-text-secondary'}`}>
+                          {item.icon}
+                        </span>
+                        {item.label}
+                        {item.label === 'Chat com Lari' && (
+                          <span className="ml-auto px-2 py-0.5 text-xs rounded-md bg-brand/20 text-brand">Novo</span>
+                        )}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </nav>
               
-              <div className="divider my-4 opacity-60"></div>
-              
-              <div className="pt-2">
-                <div className="flex items-center py-2">
+              <div className="mt-8 pt-6 border-t border-border">
+                <div className="flex items-center px-4 py-3">
                   <div className="h-8 w-8 rounded-full bg-primary text-background flex items-center justify-center text-sm font-medium">
                     {profile?.full_name ? profile.full_name.charAt(0).toUpperCase() : 'U'}
                   </div>
@@ -250,11 +261,30 @@ export default function AppLayout({
       )}
       
       {/* Conteúdo principal */}
-      <main className="flex-1 overflow-y-auto lg:pt-0 pt-14 bg-background">
-        <div className="max-w-6xl mx-auto p-4 md:p-6 fade-in">
-          {children}
-        </div>
-      </main>
+      <div className="flex-1 min-w-0 flex flex-col">
+        <main className="flex-1 overflow-y-auto focus:outline-none">
+          <div className="py-6 lg:py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              {pathname !== '/app/chat' && (
+                <div className="bg-brand/10 border border-brand/20 rounded-lg p-4 mb-6 flex items-center">
+                  <div className="flex-shrink-0 mr-4">
+                    <div className="h-10 w-10 rounded-full bg-brand/20 flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-brand font-medium">Conheça Lari, sua terapeuta digital</h3>
+                    <p className="text-sm text-text-primary mt-1">Precisa conversar? <Link href="/app/chat" className="text-brand underline">Bater um papo com a Lari</Link> pode ajudar você a processar suas emoções.</p>
+                  </div>
+                </div>
+              )}
+              {children}
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   )
 }

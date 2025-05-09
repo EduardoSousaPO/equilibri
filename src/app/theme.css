@@ -1,118 +1,160 @@
 /* Arquivo de tema para o Equilibri - Design Minimalista e Equilibrado */
 
-:root {
-  /* Paleta de Cores Principal - Mais minimalista e equilibrada */
-  --primary: #0A515F; /* Azul petróleo mais suave */
-  --primary-light: #136D7F; /* Tom médio para hover */
-  --primary-ultra-light: #E9F3F5; /* Tom muito suave para fundos sutis */
-  --accent: #B89035; /* Dourado mais equilibrado */
-  --accent-light: #F2ECD7; /* Dourado bem claro */
-  --success: #5E9A85; /* Verde acinzentado equilibrado */
-  
-  /* Paleta Neutra - Minimalista */
-  --background: #FEFEFE; /* Branco com tom bem suave */
-  --background-secondary: #F8F5EF; /* Creme bem clarinho */
-  --border: #EEEBE5; /* Borda sutil com tom creme */
-  --text-secondary: #7D8384; /* Cinza médio equilibrado */
-  --text-primary: #2A3B3E; /* Cinza escuro esverdeado */
-  
-  /* Estados */
-  --error: #B86464; /* Vermelho mais suave e menos vibrante */
-  --warning: #D9AD6B; /* Laranja mais suave e acinzentado */
-  --info: #5291AD; /* Azul mais equilibrado */
-  
-  /* Feedback de cores mais suaves */
-  --success-50: #F4F9F7;
-  --success-100: #E2F0EB;
-  --error-50: #F9F1F1;
-  --error-100: #F2E4E4;
-  --warning-50: #FCF8F2;
-  --warning-100: #F8F0E2;
-  --info-50: #F0F6F9;
-  --info-100: #E3EFF4;
-  
-  /* Variáveis de Cores Equilibri */
-  --teal-900: #0A515F;
-  --teal-800: #136D7F;
-  --teal-700: #308799;
-  --teal-50: #E9F3F5;
-  --cream-50: #F8F5EF;
-  --cream-100: #F2ECD7;
-  --gold-500: #B89035;
-  --gold-400: #D6C479;
-  --gold-100: #F9F6E9;
-  
-  /* Sombras - Mais sutis */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
-  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.02);
-  --shadow-md: 0 2px 4px -1px rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
-  --shadow-lg: 0 3px 6px -2px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
-  --shadow-xl: 0 4px 8px -2px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
-  
-  /* Arredondamento - Mais suave */
-  --radius-sm: 0.3rem;
-  --radius: 0.4rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.7rem;
-  --radius-full: 9999px;
-  
-  /* Espaçamento */
-  --spacing-1: 0.25rem;
-  --spacing-2: 0.5rem;
-  --spacing-3: 0.75rem;
-  --spacing-4: 1rem;
-  --spacing-6: 1.5rem;
-  --spacing-8: 2rem;
-  --spacing-12: 3rem;
-  --spacing-16: 4rem;
-  
-  /* Transições - Mais suaves */
-  --transition-fast: 250ms;
-  --transition: 350ms;
-  --transition-slow: 450ms;
-  
-  /* Propriedades de cursor de foco */
-  --focus-ring: 0 0 0 2px rgba(19, 109, 127, 0.15);
-  --focus-ring-offset: 1px;
-  
-  /* Variáveis de layout */
-  --content-width-sm: 640px;
-  --content-width-md: 768px;
-  --content-width-lg: 1024px;
-  --content-width-xl: 1280px;
-  
-  /* Opacidade */
-  --opacity-hover: 0.88;
-  --opacity-active: 0.92;
-  --opacity-disabled: 0.65;
-}
+@tailwind base;
 
-/* Modo escuro - mais equilibrado */
-.dark {
-  --primary: #136D7F;
-  --primary-light: #0A515F;
-  --primary-ultra-light: #0E2A33;
-  --accent: #D6C479;
-  --accent-light: #3A3629;
-  --success: #5E9A85;
+@layer base {
+  :root {
+    /* Paleta de Cores Principal - Mais minimalista e equilibrada */
+    --primary: #00574B;
+    --primary-light: #006c5e;
+    --primary-ultra-light: #EEF6F5;
+    --accent: #D4B254;
+    --accent-light: #E6CA7C;
+    --success: #4ECDC4;
+    
+    /* Paleta Neutra - Minimalista */
+    --background: #FCFCFC;
+    --background-secondary: #f7f9fa;
+    --border: #e2e8f0;
+    --text-secondary: #64748b;
+    --text-primary: #2d3748;
+    
+    /* Estados */
+    --error: #FF6B6B;
+    --warning: #FFD166;
+    --info: #3A97D4;
+    
+    /* Feedback de cores mais suaves */
+    --success-50: #F4F9F7;
+    --success-100: #E2F0EB;
+    --error-50: #F9F1F1;
+    --error-100: #F2E4E4;
+    --warning-50: #FCF8F2;
+    --warning-100: #F8F0E2;
+    --info-50: #F0F6F9;
+    --info-100: #E3EFF4;
+    
+    /* Variáveis de Cores Equilibri */
+    --teal-900: #00574B;
+    --teal-800: #006C5E;
+    --teal-700: #308799;
+    --teal-50: #EEF6F5;
+    --cream-50: #FFFAF5;
+    --cream-100: #FFF5E8;
+    --cream-200: #FEEBD1;
+    --gold-500: #D4B254;
+    --gold-400: #E6CA7C;
+    --gold-100: #F9F6E9;
+    
+    /* Sombras - Mais sutis */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 4px 8px -2px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+    
+    /* Arredondamento - Mais suave */
+    --radius-sm: 0.25rem;
+    --radius: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-full: 9999px;
+    
+    /* Espaçamento */
+    --spacing-1: 0.25rem;
+    --spacing-2: 0.5rem;
+    --spacing-3: 0.75rem;
+    --spacing-4: 1rem;
+    --spacing-6: 1.5rem;
+    --spacing-8: 2rem;
+    --spacing-12: 3rem;
+    --spacing-16: 4rem;
+    
+    /* Transições - Mais suaves */
+    --transition-fast: 250ms;
+    --transition: 0.3s;
+    --transition-slow: 450ms;
+    
+    /* Propriedades de cursor de foco */
+    --focus-ring: 0 0 0 2px rgba(19, 109, 127, 0.15);
+    --focus-ring-offset: 1px;
+    
+    /* Variáveis de layout */
+    --content-width-sm: 640px;
+    --content-width-md: 768px;
+    --content-width-lg: 1024px;
+    --content-width-xl: 1280px;
+    
+    /* Opacidade */
+    --opacity-hover: 0.88;
+    --opacity-active: 0.92;
+    --opacity-disabled: 0.65;
+    
+    /* Novas cores da marca Equilibri.IA */
+    --brand: #6FA590;
+    --brand-secondary: #8AA1B1;
+    
+    --secondary: #1f2937;
+    --secondary-light: #374151;
+    
+    --foreground: #0F172A;
+    
+    --destructive: #dc2626;
+    
+    --muted: #f3f4f6;
+    --muted-foreground: #6b7280;
+    
+    --card: #ffffff;
+    --card-foreground: #1e293b;
+    
+    --popover: #ffffff;
+    --popover-foreground: #0F172A;
+    
+    --input: #e2e8f0;
+    --ring: #94a3b8;
+  }
   
-  --background: #1A1E1F;
-  --background-secondary: #232728;
-  --border: #373D3E;
-  --text-secondary: #9DA3A4;
-  --text-primary: #E5EBEC;
-  
-  --teal-900: #136D7F;
-  --teal-800: #1F7D8F;
-  --teal-700: #308799;
-  --teal-50: #0E2A33;
-  --cream-50: #232728;
-  --cream-100: #2D3233;
-  --gold-500: #D6C479;
-  --gold-400: #C2B26A;
-  --gold-100: #3A3629;
-  
-  --focus-ring: 0 0 0 2px rgba(19, 109, 127, 0.3);
+  .dark {
+    --primary: #00A693;
+    --primary-light: #00C7B2;
+    --primary-ultra-light: #1A2E2D;
+    --accent: #E6CA7C;
+    --accent-light: #F9DC95;
+    --success: #3DB4AC;
+    
+    --background: #0F172A;
+    --background-secondary: #1E293B;
+    --border: #334155;
+    --text-secondary: #cbd5e1;
+    --text-primary: #f1f5f9;
+    
+    --teal-900: #00A693;
+    --teal-800: #00C7B2;
+    --teal-700: #308799;
+    --teal-50: #1A2E2D;
+    --cream-50: #12151E;
+    --cream-100: #1A1E2C;
+    --cream-200: #242938;
+    --gold-500: #E6CA7C;
+    --gold-400: #F9DC95;
+    --gold-100: #3A3629;
+    
+    --focus-ring: 0 0 0 2px rgba(19, 109, 127, 0.3);
+    
+    /* Novas cores da marca Equilibri.IA em modo escuro */
+    --brand: #7DB69F;
+    --brand-secondary: #99B3C5;
+    
+    --secondary: #e2e8f0;
+    --secondary-light: #f1f5f9;
+    
+    --foreground: #f8fafc;
+    
+    --destructive: #ef4444;
+    
+    --muted: #1E293B;
+    --muted-foreground: #94a3b8;
+  }
 }
 
 /* Estilos base */
@@ -275,7 +317,7 @@ p {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -392,9 +434,19 @@ p {
 }
 
 .hover-lift {
-  transition: transform var(--transition);
+  transition: transform 0.3s ease;
 }
 
 .hover-lift:hover {
   transform: translateY(-2px);
+}
+
+/* Animação customizada para shimmer effect */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
 }
