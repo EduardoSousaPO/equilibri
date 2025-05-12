@@ -1,5 +1,6 @@
 "use client"
 
+// Componente atualizado para corrigir problema de build na Vercel - 2025-05-12
 import React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"

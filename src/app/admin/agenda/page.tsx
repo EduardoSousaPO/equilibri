@@ -1,5 +1,6 @@
 'use client';
 
+// Página de administração de agenda atualizada em 2025-05-12
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';

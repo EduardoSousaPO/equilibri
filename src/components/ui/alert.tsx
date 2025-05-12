@@ -1,5 +1,6 @@
 "use client"
 
+// Componente atualizado para corrigir problema de build na Vercel
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
