@@ -1,5 +1,6 @@
 "use client"
 
+// Atualizado para resolver problema de build na Vercel
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { DayPicker } from "react-day-picker"
