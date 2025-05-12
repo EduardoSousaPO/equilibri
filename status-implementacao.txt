@@ -1,0 +1,70 @@
+# Status de Implementação - Projeto Equilibri.IA
+
+## Objetivo Geral
+- [x] Essencializar navegação (/chat, /dashboard, /settings)
+- [x] Pacotes claros (Free, Premium, Premium Clínico)
+- [x] Implementar limites (Free: 30 mensagens/mês)
+- [x] Implementar Premium (Ilimitado + Relatórios PDF)
+- [x] Implementar Premium Clínico (Tudo do Premium + 1 videossessão/mês)
+- [x] Agenda integrada
+- [x] UI reforçando diferencial humano vs ChatGPT
+
+## 1. Novas Rotas
+- [x] /chat - Interação com Lari (texto/voz/check-in)
+- [x] /dashboard - Mood-chart, highlights, PDF (premium)
+- [x] /settings - Plano, upgrade, privacidade
+- [x] /agenda - Reservar sessão mensal (Premium Clínico)
+- [x] /admin/agenda - Cadastrar slots (apenas role 'therapist')
+
+## 2. Banco Supabase
+- [x] Criar tabela therapists
+- [x] Criar tabela slots
+- [x] Criar tabela appointments
+- [x] Configurar policies de acesso
+
+## 3. API/Lib
+- [x] Implementar lib/agenda.ts
+- [x] Criar função listFreeSlots()
+- [x] Criar função bookSlot()
+- [x] Integração com Google Calendar API
+
+## 4. UI
+- [x] Implementar /agenda (usuário)
+- [x] Implementar /admin/agenda (psicóloga)
+
+## 5. Planos & Limite
+- [x] Implementar flags de plano no banco
+- [x] Criar função de reset mensal
+- [x] Implementar verificação de limites
+
+## 6. Onscreen Copy
+- [x] Criar componente WhyNotGPT.tsx
+- [x] Implementar tabela comparativa
+
+## 7. Onboarding Ajustado
+- [x] Ajustar fluxo: Cadastro → emoji → chat
+- [x] Adicionar banner para plano 'clinical'
+
+## 8. UI Banners
+- [x] Banner Free
+- [x] Banner Premium
+- [x] Banner Premium Clínico
+
+## 9. Bloqueios
+- [x] Verificação de limites em sendMessage()
+- [x] Bloqueio de agendamento quando necessário
+
+## 10. Testes & Deploy
+- [ ] Testar fluxo de criação de slots
+- [ ] Testar reserva de slots
+- [ ] Testar visibilidade de slots
+- [ ] Testar chat e limites
+- [ ] Testar geração de PDF
+- [ ] Testar reset de contadores
+
+## Próximos Passos
+- Realizar testes completos de todas as funcionalidades
+- Implementar integração real com Google Calendar API
+- Integrar com gateway de pagamento real (MercadoPago)
+- Melhorar componentes UI utilizando Shadcn
+- Preparar PR para branch main 
