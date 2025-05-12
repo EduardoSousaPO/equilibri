@@ -1,16 +1,11 @@
-import React from 'react';
-import { cn } from '@/utils/cn';
+"use client"
 
-interface TypingDotsProps {
-  className?: string;
-}
-
-export function TypingDots({ className }: TypingDotsProps) {
+export default function TypingDots() {
   return (
-    <div className={cn("flex space-x-1", className)}>
-      <div className="w-2 h-2 bg-brand/60 rounded-full animate-pulse-slow"></div>
-      <div className="w-2 h-2 bg-brand/60 rounded-full animate-pulse-slow delay-75"></div>
-      <div className="w-2 h-2 bg-brand/60 rounded-full animate-pulse-slow delay-150"></div>
+    <div className="flex space-x-1 py-2">
+      <div className="animate-pulse h-2 w-2 rounded-full bg-gray-400 dark:bg-gray-500"></div>
+      <div className="animate-pulse delay-75 h-2 w-2 rounded-full bg-gray-400 dark:bg-gray-500"></div>
+      <div className="animate-pulse delay-150 h-2 w-2 rounded-full bg-gray-400 dark:bg-gray-500"></div>
     </div>
   );
 } 
