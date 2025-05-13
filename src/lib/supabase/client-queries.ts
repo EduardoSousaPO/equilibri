@@ -730,3 +730,88 @@ export async function updateProfile(updates: Partial<{ name: string, avatar_url:
     return { data: null, error: 'Erro ao atualizar perfil' }
   }
 }
+
+/**
+ * Verifica se o usuário atingiu o limite de mensagens de chat
+ * - Free: 30 mensagens/mês
+ * - Pro/Clinical: ilimitado
+ */
+export async function checkMessageLimit(): Promise<{ limitReached: boolean, error: string | null, plan: string | null }> {
+  const supabase = createClientSupabaseClient()
+  
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      return { limitReached: false, error: 'Não autenticado', plan: null }
+    }
+    
+    // Verificar o plano do usuário
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('plan, msg_count')
+      .eq('id', user.id)
+      .single()
+    
+    if (!profile) {
+      return { limitReached: false, error: 'Perfil não encontrado', plan: null }
+    }
+    
+    // Se for premium ou clinical, não há limite
+    if (profile.plan === 'pro' || profile.plan === 'clinical') {
+      return { limitReached: false, error: null, plan: profile.plan }
+    }
+    
+    // Para plano free, limite de 30 mensagens/mês
+    const limitReached = (profile.msg_count || 0) >= 30
+    
+    return { limitReached, error: null, plan: profile.plan }
+  } catch (error) {
+    console.error('Error checking message limit:', error)
+    return { limitReached: false, error: 'Erro ao verificar limite de mensagens', plan: null }
+  }
+}
+
+/**
+ * Incrementa o contador de mensagens do usuário
+ */
+export async function incrementMessageCount(): Promise<{ success: boolean, error: string | null }> {
+  const supabase = createClientSupabaseClient()
+  
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      return { success: false, error: 'Não autenticado' }
+    }
+    
+    // Buscar o contador atual
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('msg_count, plan')
+      .eq('id', user.id)
+      .single()
+    
+    if (!profile) {
+      return { success: false, error: 'Perfil não encontrado' }
+    }
+    
+    // Se for plano premium ou clinical, não precisa incrementar
+    if (profile.plan === 'pro' || profile.plan === 'clinical') {
+      return { success: true, error: null }
+    }
+    
+    // Incrementar contador para plano free
+    const { error } = await supabase
+      .from('profiles')
+      .update({ msg_count: (profile.msg_count || 0) + 1 })
+      .eq('id', user.id)
+    
+    if (error) throw error
+    
+    return { success: true, error: null }
+  } catch (error) {
+    console.error('Error incrementing message count:', error)
+    return { success: false, error: 'Erro ao incrementar contador de mensagens' }
+  }
+}

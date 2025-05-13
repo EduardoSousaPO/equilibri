@@ -55,16 +55,16 @@
 - [x] Bloqueio de agendamento quando necessário
 
 ## 10. Testes & Deploy
-- [ ] Testar fluxo de criação de slots
-- [ ] Testar reserva de slots
-- [ ] Testar visibilidade de slots
-- [ ] Testar chat e limites
-- [ ] Testar geração de PDF
-- [ ] Testar reset de contadores
+- [x] Testar fluxo de criação de slots
+- [x] Testar reserva de slots
+- [x] Testar visibilidade de slots
+- [x] Testar chat e limites
+- [x] Testar geração de PDF
+- [x] Testar reset de contadores
 
 ## Próximos Passos
-- Realizar testes completos de todas as funcionalidades
-- Implementar integração real com Google Calendar API
-- Integrar com gateway de pagamento real (MercadoPago)
-- Melhorar componentes UI utilizando Shadcn
-- Preparar PR para branch main 
+- Implementar página de checkout para upgrade de plano
+- Melhorar UI responsiva
+- Adicionar testes de integração E2E
+- Melhorar o fluxo de UX na reserva de sessões
+- Implementar cancelamento de sessões 

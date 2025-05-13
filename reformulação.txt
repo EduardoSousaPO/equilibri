@@ -1,0 +1,148 @@
+(branch refactor/core-unification → abrir PR em main)
+
+0 · OBJETIVO GERAL
+Essencializar toda a navegação (tudo via /chat, /dashboard, /settings).
+
+Pacotes claros
+
+Free 30 mensagens/mês.
+
+Premium Ilimitado + Relatórios PDF.
+
+Premium Clínico Tudo do Premium + 1 videossessão de 60 min/mês com psicóloga (agenda interna).
+
+Agenda integrada — usuário vê apenas slots que a psicóloga liberou; ao reservar, o slot some. Uma única psicóloga = nunca dois usuários no mesmo horário.
+
+Copy/UI reforçando “Equilibri.IA ≠ ChatGPT” + diferencial HUMANO.
+
+1 · NOVAS ROTAS
+bash
+Copiar
+Editar
+/chat          interação com Lari (texto·voz·check-in)
+/dashboard     mood-chart, highlights, PDF (se premium)
+/settings      plano, upgrade, privacidade
+/agenda        reservar sessão mensal (só Premium Clínico)
+/admin/agenda  (somente role 'therapist') cadastrar slots
+2 · BANCO SUPABASE
+sql
+Copiar
+Editar
+-- psicóloga
+CREATE TABLE therapists (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id uuid REFERENCES auth.users,  -- login da psicóloga
+  name text,
+  crp  text,
+  timezone text
+);
+-- horários ofertados
+CREATE TABLE slots (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  therapist_id uuid REFERENCES therapists(id),
+  start_utc timestamptz,
+  end_utc   timestamptz,
+  status text CHECK (status IN ('free','booked')) DEFAULT 'free'
+);
+-- agendamentos
+CREATE TABLE appointments (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  slot_id uuid REFERENCES slots(id) UNIQUE,
+  user_id uuid REFERENCES auth.users,
+  meet_link text,
+  notes text
+);
+Policy: user pode select slots status='free'; psicóloga pode insert/update em sua agenda; ninguém vê slots de outros terapeutas.
+
+3 · API / LIB
+ts
+Copiar
+Editar
+// lib/agenda.ts
+export async function listFreeSlots() { ... }
+export async function bookSlot(userId, slotId) {
+  // 1) update slots set status='booked'
+  // 2) create appointments row + meet_link (Google Calendar API)
+}
+Google Calendar token salvo em therapists.calendar_credentials.
+
+Função serverless gera evento + Meet link e armazena.
+
+4 · UI
+4.1 /agenda (usuário Premium Clínico)
+tsx
+Copiar
+Editar
+<CalendarMonth>
+  {slots.map(s => <SlotButton ... disabled={status!=='free'} />)}
+</CalendarMonth>
+Clica → modal “Confirmar sessão 14 Jun 19 h?” → bookSlot.
+
+Após reservar, aparece card com link Meet + botão “Adicionar ao Google Calendar”.
+
+4.2 /admin/agenda
+Form para psicóloga escolher dia, hora, duração; gera vários slots “free”.
+
+Lista seus slots (free/booked).
+
+5 · PLANOS & LIMITE
+Plano	Limite chat	Sessão humana	BD flag
+Free	30/mês	—	'free'
+Premium	Ilimitado	—	'pro'
+Premium Clínico	Ilimitado	1×60 min/mês	'clinical'
+
+Edge function /functions/reset_limits.ts “dia 1” → zera msg_count e session_used (para clinical).
+
+No bookSlot se session_used = 1 → bloquear (até próximo mês).
+
+6 · ONSCREEN COPY (por que não ChatGPT)
+Componente WhyNotGPT.tsx (landing & modal upgrade):
+
+Equilibri.IA	ChatGPT
+IA empática + Plano Terapêutico Dinâmico	Prompt manual
+Registro de humor & gráfico	✖
+PDF pronto p/ terapeuta	✖
+Sessão mensal 1 h com psicóloga	✖
+Dados privados no Brasil	Armazenados fora
+
+7 · ONBOARDING AJUSTADO
+Cadastro → emoji → chat.
+
+Banner se plano 'clinical':
+
+“Agende sua sessão de 1 h este mês” → botão /agenda.
+
+8 · UI BANNERS (settings)
+Free – “30 mensagens/mês · Plano Terapêutico · Grátis”.
+
+Premium – “Ilimitado · PDF · R$ 39,90”.
+
+Premium Clínico – “Ilimitado + Sessão 1 h c/ psicóloga · R$ 179”.
+
+9 · BLOQUEIOS
+sendMessage() verifica:
+
+ts
+Copiar
+Editar
+if (plan==='free' && msg_count>=30) openModalUpgrade();
+Agenda bloqueia se slot já booked ou session_used=1.
+
+10 · TESTES & DEPLOY
+Psicóloga acessa /admin/agenda, cria 5 slots.
+
+Usuário 'clinical' vê slots, reserva 1 → slot some.
+
+Outro usuário não vê slot retirado.
+
+Lari continua chat; dashboard gera PDF; cron zera contadores.
+
+DONE
+“Commits atomizados: chat-fusion, dashboard, agenda-user, admin-agenda, copy-whynot, plans. PR pronto e marca @product.”
+
+
+
+
+
+
+

@@ -4,22 +4,34 @@ import React, { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Message, ChatMessage } from './message';
 import { ChatInput } from './chat-input';
-import { createClientSupabaseClient, uploadAudio } from '@/lib/supabase/client-queries';
+import { 
+  createClientSupabaseClient, 
+  uploadAudio, 
+  checkMessageLimit,
+  incrementMessageCount 
+} from '@/lib/supabase/client-queries';
 import { useRouter } from 'next/navigation';
+import PlanBanner from '@/components/PlanBanner';
+import WhyNotGPT from '@/components/WhyNotGPT';
 
 // Modal para alertar sobre limite de mensagens
 function UpgradeModal({ onClose, onUpgrade }: { onClose: () => void; onUpgrade: () => void }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
         <h3 className="text-xl font-bold mb-2">Limite de Mensagens Atingido</h3>
         <p className="mb-4">
           Você atingiu o limite de 30 mensagens para o plano gratuito. 
           Faça upgrade para o plano Premium e tenha conversas ilimitadas com a Lari.
         </p>
+        
+        <div className="mt-4 mb-4">
+          <WhyNotGPT variant="sidebar" />
+        </div>
+        
         <div className="flex justify-end gap-2">
           <button
-            className="px-4 py-2 border border-gray-300 rounded-md"
+            className="px-4 py-2 border border-gray-300 rounded-md dark:border-gray-600 dark:text-gray-200"
             onClick={onClose}
           >
             Fechar
@@ -49,6 +61,7 @@ export function Chat() {
   const [userId, setUserId] = useState<string | null>(null);
   const [userPlan, setUserPlan] = useState<string>('free');
   const [messageCount, setMessageCount] = useState<number>(0);
+  const [sessionUsed, setSessionUsed] = useState<boolean>(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   
   const router = useRouter();
@@ -65,13 +78,14 @@ export function Chat() {
         // Buscar plano e contagem de mensagens
         const { data } = await supabase
           .from('profiles')
-          .select('plan, msg_count')
+          .select('plan, msg_count, session_used')
           .eq('id', user.id)
           .single();
           
         if (data) {
           setUserPlan(data.plan || 'free');
           setMessageCount(data.msg_count || 0);
+          setSessionUsed(data.session_used || false);
         }
       }
     };
@@ -84,38 +98,26 @@ export function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
   
-  // Verificar limite de mensagens
-  const checkMessageLimit = (): boolean => {
-    if (userPlan === 'free' && messageCount >= 30) {
+  // Verificar limite de mensagens (agora usando a função do client-queries)
+  const checkMessageLimitLocal = async (): Promise<boolean> => {
+    const { limitReached, error, plan } = await checkMessageLimit();
+    
+    if (limitReached) {
       setShowUpgradeModal(true);
       return false;
     }
-    return true;
-  };
-  
-  // Incrementar contagem de mensagens
-  const incrementMessageCount = async () => {
-    if (!userId) return;
     
-    // Apenas incrementa para usuários do plano free
-    if (userPlan === 'free') {
-      const supabase = createClientSupabaseClient();
-      const newCount = messageCount + 1;
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update({ msg_count: newCount })
-        .eq('id', userId);
-        
-      if (!error) {
-        setMessageCount(newCount);
-      }
+    if (plan) {
+      setUserPlan(plan);
     }
+    
+    return !limitReached;
   };
   
   const handleSendMessage = async (content: string) => {
     // Verificar limite antes de enviar
-    if (!checkMessageLimit()) return;
+    const canSend = await checkMessageLimitLocal();
+    if (!canSend) return;
     
     // Add user message
     const userMessage: ChatMessage = {
@@ -130,7 +132,10 @@ export function Chat() {
     
     try {
       // Incrementar contagem
-      await incrementMessageCount();
+      const { success } = await incrementMessageCount();
+      if (success) {
+        setMessageCount(prev => prev + 1);
+      }
       
       // Send to API
       const response = await fetch('/api/chat', {
@@ -182,7 +187,8 @@ export function Chat() {
   
   const handleAudioRecorded = async (audioBlob: Blob) => {
     // Verificar limite antes de enviar
-    if (!checkMessageLimit()) return;
+    const canSend = await checkMessageLimitLocal();
+    if (!canSend) return;
     
     try {
       if (!userId) {
@@ -192,7 +198,10 @@ export function Chat() {
       setIsTyping(true);
       
       // Incrementar contagem
-      await incrementMessageCount();
+      const { success } = await incrementMessageCount();
+      if (success) {
+        setMessageCount(prev => prev + 1);
+      }
       
       // Adicionar mensagem temporária de áudio
       const audioMessage: ChatMessage = {
@@ -285,9 +294,20 @@ export function Chat() {
   };
   
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        {messages.map(message => (
+    <div className="flex flex-col h-screen">
+      {/* Banner de plano */}
+      <div className="py-2 px-4 border-b">
+        <PlanBanner 
+          plan={userPlan as any} 
+          msgCount={messageCount} 
+          usedSession={sessionUsed} 
+          variant="sidebar" 
+        />
+      </div>
+      
+      {/* Chat container */}
+      <div className="flex-1 overflow-y-auto p-4">
+        {messages.map((message) => (
           <Message key={message.id} message={message} />
         ))}
         
@@ -297,38 +317,25 @@ export function Chat() {
               id: 'typing',
               content: '',
               role: 'assistant',
+              isTyping: true,
               createdAt: new Date()
-            }}
-            isTyping={true}
+            }} 
           />
-        )}
-        
-        {userPlan === 'free' && (
-          <div className="flex justify-center">
-            <div className="bg-amber-50 border border-amber-100 text-amber-800 px-4 py-2 rounded text-sm">
-              Plano Free: {messageCount}/30 mensagens usadas este mês
-            </div>
-          </div>
         )}
         
         <div ref={messagesEndRef} />
       </div>
       
-      <div className="p-4 border-t border-gray-100">
-        <ChatInput 
-          onSend={handleSendMessage}
-          onAudioRecorded={handleAudioRecorded}
-          disabled={isTyping || (userPlan === 'free' && messageCount >= 30)}
-        />
+      {/* Input container */}
+      <div className="border-t p-4">
+        <ChatInput onSendMessage={handleSendMessage} onAudioRecorded={handleAudioRecorded} />
       </div>
       
+      {/* Modal de upgrade */}
       {showUpgradeModal && (
         <UpgradeModal 
-          onClose={() => setShowUpgradeModal(false)}
-          onUpgrade={() => {
-            setShowUpgradeModal(false);
-            router.push('/settings');
-          }}
+          onClose={() => setShowUpgradeModal(false)} 
+          onUpgrade={() => router.push('/settings')} 
         />
       )}
     </div>
