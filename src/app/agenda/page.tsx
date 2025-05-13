@@ -1,16 +1,35 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, isAfter } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Slot } from '@/lib/agenda';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle, CalendarIcon, Clock } from 'lucide-react';
+import Link from 'next/link';
+
+interface Slot {
+  id: string;
+  therapist_id: string;
+  start_utc: string;
+  end_utc: string;
+  status: 'free' | 'booked';
+  therapist_name?: string;
+}
+
+interface Appointment {
+  id: string;
+  slot_id: string;
+  user_id: string;
+  meet_link: string;
+  notes: string;
+  created_at: string;
+  slot?: Slot;
+}
 
 export default function AgendaPage() {
   const [slots, setSlots] = useState<Slot[]>([]);
@@ -23,6 +42,13 @@ export default function AgendaPage() {
   const [userPlan, setUserPlan] = useState<string | null>(null);
   const [sessionUsed, setSessionUsed] = useState(false);
   const [appointmentLink, setAppointmentLink] = useState<string | null>(null);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [bookingSlot, setBookingSlot] = useState(false);
+  const [cancellingAppointment, setCancellingAppointment] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [appointmentToCancel, setAppointmentToCancel] = useState<Appointment | null>(null);
+  const [showSlotModal, setShowSlotModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   
   const router = useRouter();
   const supabase = createClientComponentClient();
@@ -196,6 +222,91 @@ export default function AgendaPage() {
     } finally {
       setConfirmOpen(false);
     }
+  };
+
+  // Verificar se há agendamentos futuros
+  const hasFutureAppointments = appointments.some(appointment => 
+    appointment.slot && isAfter(parseISO(appointment.slot.start_utc), new Date())
+  );
+
+  // Handler para clicar em um slot
+  const handleSlotClick = (slot: Slot) => {
+    if (sessionUsed) return; // Não permitir agendamento se já utilizou a sessão
+    setSelectedSlot(slot);
+    setShowSlotModal(true);
+  };
+
+  // Função para cancelar um agendamento
+  const cancelAppointment = async () => {
+    if (!appointmentToCancel) return;
+    
+    setCancellingAppointment(true);
+    setError(null);
+    setSuccess(null);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+      
+      // 1. Atualizar o status do slot para 'free'
+      const { error: slotError } = await supabase
+        .from('slots')
+        .update({ status: 'free' })
+        .eq('id', appointmentToCancel.slot_id);
+        
+      if (slotError) throw slotError;
+      
+      // 2. Excluir o agendamento
+      const { error: deleteError } = await supabase
+        .from('appointments')
+        .delete()
+        .eq('id', appointmentToCancel.id);
+        
+      if (deleteError) {
+        // Rollback - restaurar slot para 'booked' se falhar
+        await supabase
+          .from('slots')
+          .update({ status: 'booked' })
+          .eq('id', appointmentToCancel.slot_id);
+          
+        throw deleteError;
+      }
+      
+      // 3. Atualizar o perfil do usuário para permitir novo agendamento
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ session_used: false })
+        .eq('id', user.id);
+        
+      if (profileError) {
+        console.error('Erro ao atualizar perfil:', profileError);
+      }
+      
+      setSessionUsed(false);
+      setSuccess('Sessão cancelada com sucesso!');
+      
+      // Recarregar página após 2 segundos
+      setTimeout(() => {
+        router.refresh();
+      }, 2000);
+      
+    } catch (err) {
+      console.error('Erro ao cancelar sessão:', err);
+      setError('Ocorreu um erro ao cancelar sua sessão. Tente novamente.');
+    } finally {
+      setCancellingAppointment(false);
+      setShowCancelModal(false);
+    }
+  };
+
+  // Handler para clicar em cancelar agendamento
+  const handleCancelClick = (appointment: Appointment) => {
+    setAppointmentToCancel(appointment);
+    setShowCancelModal(true);
   };
 
   if (userPlan !== 'clinical') {

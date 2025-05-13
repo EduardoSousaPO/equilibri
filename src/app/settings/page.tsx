@@ -127,11 +127,7 @@ export default function SettingsPage() {
 
   // Função para iniciar processo de upgrade
   const handleUpgrade = (plan: string) => {
-    setSelectedPlan(plan);
-    setShowUpgradeModal(true);
-    
-    // Aqui você implementaria a integração com gateway de pagamento
-    // como MercadoPago ou outro
+    router.push(`/checkout?plan=${plan}`);
   };
 
   // Dados dos planos

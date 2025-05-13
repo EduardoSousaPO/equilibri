@@ -245,4 +245,67 @@ export async function createSlots(
   }
   
   return data || [];
+}
+
+/**
+ * Cancela um agendamento existente
+ */
+export async function cancelAppointment(userId: string, appointmentId: string): Promise<void> {
+  const supabase = getSupabaseServer();
+  
+  // Verificar se o agendamento pertence ao usuário
+  const { data: appointment, error: fetchError } = await supabase
+    .from('appointments')
+    .select('*, slot:slot_id(*)')
+    .eq('id', appointmentId)
+    .eq('user_id', userId)
+    .single();
+    
+  if (fetchError || !appointment) {
+    console.error('Erro ao buscar agendamento:', fetchError);
+    throw new Error('Agendamento não encontrado ou não pertence a você');
+  }
+  
+  // Iniciar transação
+  // 1. Atualizar o status do slot para 'free'
+  const { error: slotError } = await supabase
+    .from('slots')
+    .update({ status: 'free' })
+    .eq('id', appointment.slot_id);
+    
+  if (slotError) {
+    console.error('Erro ao atualizar slot:', slotError);
+    throw new Error('Falha ao liberar o horário');
+  }
+  
+  // 2. Excluir o agendamento
+  const { error: deleteError } = await supabase
+    .from('appointments')
+    .delete()
+    .eq('id', appointmentId);
+    
+  if (deleteError) {
+    console.error('Erro ao excluir agendamento:', deleteError);
+    
+    // Rollback - restaurar slot para 'booked' se falhar
+    await supabase
+      .from('slots')
+      .update({ status: 'booked' })
+      .eq('id', appointment.slot_id);
+      
+    throw new Error('Falha ao cancelar o agendamento');
+  }
+  
+  // 3. Atualizar o perfil do usuário para permitir novo agendamento
+  const { error: profileError } = await supabase
+    .from('profiles')
+    .update({ session_used: false })
+    .eq('id', userId);
+    
+  if (profileError) {
+    console.error('Erro ao atualizar perfil:', profileError);
+    // Não precisamos reverter aqui pois o agendamento já foi cancelado
+  }
+  
+  // TODO: Cancelar evento no Google Calendar se integrado
 } 
