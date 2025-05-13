@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClientSupabaseClient } from '@/lib/supabase/client-queries'
 
@@ -11,6 +11,8 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectPath = searchParams.get('redirect')
   const supabase = createClientSupabaseClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,7 +31,13 @@ export function LoginForm() {
       }
 
       router.refresh()
-      router.push('/app/dashboard')
+      
+      // Redirecionar com base no parâmetro da URL, se existir
+      if (redirectPath) {
+        router.push(`/${redirectPath}`)
+      } else {
+        router.push('/dashboard')
+      }
     } catch (error: any) {
       console.error('Erro no login:', error)
       setError(error.message || 'Ocorreu um erro ao fazer login. Tente novamente.')
@@ -42,7 +50,11 @@ export function LoginForm() {
     <div className="w-full max-w-md space-y-6">
       <div className="text-center">
         <h1 className="text-2xl font-bold text-primary">Acesse o Equilibri.IA</h1>
-        <p className="text-text-secondary">Faça login para continuar sua jornada terapêutica</p>
+        <p className="text-text-secondary">
+          {redirectPath === 'chat' 
+            ? 'Faça login para conversar com Lari, sua terapeuta digital'
+            : 'Faça login para continuar sua jornada terapêutica'}
+        </p>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -99,7 +111,7 @@ export function LoginForm() {
       <div className="text-center">
         <p className="text-sm text-text-secondary">
           Não tem uma conta?{' '}
-          <Link href="/register" className="text-primary hover:underline">
+          <Link href={redirectPath ? `/register?redirect=${redirectPath}` : "/register"} className="text-primary hover:underline">
             Cadastre-se
           </Link>
         </p>

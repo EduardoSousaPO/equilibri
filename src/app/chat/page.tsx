@@ -1,10 +1,29 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Chat } from '@/components/chat/chat';
-import { Navbar } from '@/components/layout/navbar';  // Assumindo que você já tem este componente
+import { Navbar } from '@/components/layout/navbar';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useRouter } from 'next/navigation';
 
 export default function ChatPage() {
+  const router = useRouter();
+  const supabase = createClientComponentClient();
+
+  // Verificar autenticação
+  useEffect(() => {
+    async function checkAuth() {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        // Redirecionar para login se não estiver autenticado
+        router.push('/login');
+      }
+    }
+    
+    checkAuth();
+  }, [router, supabase]);
+
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       <Navbar />

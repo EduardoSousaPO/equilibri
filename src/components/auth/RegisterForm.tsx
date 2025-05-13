@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClientSupabaseClient } from '@/lib/supabase/client-queries'
 
@@ -13,6 +13,8 @@ export function RegisterForm() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectPath = searchParams.get('redirect')
   const supabase = createClientSupabaseClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,7 +57,11 @@ export function RegisterForm() {
         router.push('/verify')
       } else {
         // Autenticado automaticamente
-        router.push('/app/dashboard')
+        if (redirectPath) {
+          router.push(`/${redirectPath}`)
+        } else {
+          router.push('/dashboard')
+        }
       }
     } catch (error: any) {
       console.error('Erro no registro:', error)
@@ -69,7 +75,11 @@ export function RegisterForm() {
     <div className="w-full max-w-md space-y-6">
       <div className="text-center">
         <h1 className="text-2xl font-bold text-primary">Criar conta no Equilibri.IA</h1>
-        <p className="text-text-secondary">Preencha os dados para começar sua jornada terapêutica</p>
+        <p className="text-text-secondary">
+          {redirectPath === 'chat' 
+            ? 'Preencha os dados para conversar com Lari, sua terapeuta digital'
+            : 'Preencha os dados para começar sua jornada terapêutica'}
+        </p>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -163,7 +173,7 @@ export function RegisterForm() {
       <div className="text-center">
         <p className="text-sm text-text-secondary">
           Já tem uma conta?{' '}
-          <Link href="/login" className="text-primary hover:underline">
+          <Link href={redirectPath ? `/login?redirect=${redirectPath}` : "/login"} className="text-primary hover:underline">
             Faça login
           </Link>
         </p>

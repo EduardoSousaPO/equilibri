@@ -10,7 +10,7 @@ export default function HomePage() {
       {/* Banner da nova funcionalidade */}
       <div className="bg-brand text-white p-3 text-center">
         <p className="font-medium">
-          🎉 <span className="font-bold">Novidade:</span> Conheça Lari, sua nova terapeuta digital! <a href="/chat" className="underline font-semibold hover:text-brandSecondary transition-colors">Inicie uma conversa agora</a>
+          🎉 <span className="font-bold">Novidade:</span> Conheça Lari, sua nova terapeuta digital! <a href="/login?redirect=chat" className="underline font-semibold hover:text-brandSecondary transition-colors">Faça login para conversar</a>
         </p>
       </div>
       
@@ -59,7 +59,7 @@ export default function HomePage() {
                 <Link href="/register" className="px-8 py-3 border border-transparent text-base font-medium rounded-md text-background bg-primary hover:bg-primary-light md:py-4 md:text-lg md:px-10 transition-colors">
                   Comece seu diário
                 </Link>
-                <Link href="/chat" className="px-8 py-3 border border-transparent text-base font-medium rounded-md text-primary bg-accent hover:opacity-90 md:py-4 md:text-lg md:px-10 transition-colors">
+                <Link href="/login?redirect=chat" className="px-8 py-3 border border-transparent text-base font-medium rounded-md text-primary bg-accent hover:opacity-90 md:py-4 md:text-lg md:px-10 transition-colors">
                   Converse com Lari
                 </Link>
               </div>
@@ -114,8 +114,8 @@ export default function HomePage() {
                   </li>
                 </ul>
                 <div className="mt-8">
-                  <Link href="/chat" className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-brand hover:bg-brand/90 transition-colors">
-                    Iniciar conversa com Lari
+                  <Link href="/login?redirect=chat" className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-brand hover:bg-brand/90 transition-colors">
+                    Fazer login para conversar
                     <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 -mr-1 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
@@ -149,8 +149,8 @@ export default function HomePage() {
                     </button>
                   </div>
                   <div className="mt-4 text-center">
-                    <Link href="/chat" className="text-brand text-sm hover:underline">
-                      Iniciar conversa completa →
+                    <Link href="/login?redirect=chat" className="text-brand text-sm hover:underline">
+                      Fazer login para conversar →
                     </Link>
                   </div>
                 </div>
