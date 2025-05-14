@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClientSupabaseClient } from '@/lib/supabase'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 export function LoginForm() {
   const [email, setEmail] = useState('')
@@ -11,7 +11,9 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const supabase = createClientSupabaseClient()
+  
+  // Inicializar o cliente Supabase usando a biblioteca auth-helpers-nextjs
+  const supabase = createClientComponentClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,42 +21,51 @@ export function LoginForm() {
     setIsLoading(true)
 
     try {
-      console.log('Iniciando processo de login com email:', email)
+      console.log('[Login] Iniciando processo de autenticação com email:', email)
+      console.log('[Login] SUPABASE_URL definida:', !!process.env.NEXT_PUBLIC_SUPABASE_URL)
+      console.log('[Login] SUPABASE_ANON_KEY definida:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
       
-      // Login com email/senha
+      // Login com email/senha usando a API do Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
       
+      // Se houve erro na autenticação, exibir mensagem e encerrar
       if (error) {
-        console.error('Erro de autenticação:', error.message)
+        console.error('[Login] Erro de autenticação:', error.message, error)
         setError('Falha na autenticação: ' + error.message)
         setIsLoading(false)
         return
       }
       
-      console.log('Login bem-sucedido, usuário:', data.user?.id)
-      console.log('Session:', !!data.session ? 'Disponível' : 'Indisponível')
+      console.log('[Login] Autenticação bem-sucedida, dados do usuário:', { 
+        id: data.user?.id,
+        email: data.user?.email
+      })
+      console.log('[Login] Sessão disponível:', !!data.session)
       
-      // Forçar uma atualização da sessão nos cookies
-      const { error: refreshError } = await supabase.auth.refreshSession()
-      if (refreshError) {
-        console.warn('Aviso: Não foi possível atualizar a sessão:', refreshError.message)
-      } else {
-        console.log('Sessão atualizada com sucesso')
+      // Verificar se a sessão foi criada e está disponível
+      if (!data.session) {
+        console.error('[Login] ALERTA: Sessão não disponível após autenticação')
+        setError('Login bem-sucedido, mas sessão não foi criada. Tente novamente.')
+        setIsLoading(false)
+        return
       }
       
-      // Verificar se já temos uma sessão válida imediatamente 
-      const { data: sessionData } = await supabase.auth.getSession()
-      console.log('Estado da sessão após login:', !!sessionData.session ? 'Ativa' : 'Inativa')
+      // Redirecionamento para o dashboard usando window.location
+      // Isso garante uma navegação completa, não apenas uma atualização de state do React
+      console.log('[Login] Redirecionando para dashboard...')
       
-      // Redirecionar para dashboard usando window.location para forçar navegação completa
-      console.log('Redirecionando para dashboard usando window.location...')
+      // Opção 1: Usando window.location (recomendado para garantir navegação completa e novos cookies)
       window.location.href = '/app/dashboard'
+      
+      // Opção 2: Usando router do Next.js (pode manter contexto React mas requer refresh)
+      // router.push('/app/dashboard')
+      // router.refresh()
     } catch (e: any) {
-      console.error('Exceção durante o login:', e.message || e)
-      setError('Erro inesperado: ' + (e.message || 'Falha na conexão'))
+      console.error('[Login] Exceção não tratada durante autenticação:', e.message || e)
+      setError('Erro inesperado: ' + (e.message || 'Falha na conexão com o servidor'))
       setIsLoading(false)
     }
   }

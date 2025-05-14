@@ -1,93 +1,98 @@
-# Problemas de Autenticação no Projeto DiarioTER/Equilibri.IA
+Diagnóstico do Problema de Login com Supabase
 
 ## Problemas Identificados
 
-### 1. Inconsistências nas Bibliotecas do Supabase
+1. **Bibliotecas Supabase**: 
+   - Conflito entre as bibliotecas @supabase/auth-helpers-nextjs (0.8.7) e @supabase/ssr (0.0.10)
+   - Versão do @supabase/supabase-js (2.39.0) possivelmente incompatível
 
-O projeto estava utilizando simultaneamente múltiplas bibliotecas do Supabase com diferentes versões:
-- `@supabase/auth-helpers-nextjs` - versão 0.8.7
-- `@supabase/ssr` - versão 0.0.10 (muito recente e possivelmente incompatível)
-- `@supabase/supabase-js` - versão 2.39.0
+2. **Separação Cliente/Servidor**: 
+   - Código de acesso a cookies ou headers executando indevidamente no cliente
+   - Componentes de interface chamando funções de servidor
 
-Isso causava conflitos na forma como a autenticação era gerenciada, especialmente entre componentes cliente e servidor.
+3. **Middleware e Sessões**: 
+   - Middleware mal configurado para gerir cookies de sessão
+   - Sessão não sendo validada ou atualizada corretamente
 
-### 2. Mistura de Paradigmas Cliente/Servidor
+4. **Variáveis de Ambiente (.env.local)**: 
+   - Chaves SUPABASE_URL e SUPABASE_ANON_KEY ausentes, incorretas ou corrompidas
 
-O projeto importava funções de servidor em componentes cliente, o que violava o modelo de separação de Next.js:
-- Arquivo `index.ts` exportava tanto funções de cliente quanto de servidor
-- Componentes com `'use client'` importavam funções que usavam `cookies` do `next/headers`
+5. **Rota /auth/callback**: 
+   - Rota não capturando ou processando corretamente o código de autenticação
+   - Falha no redirecionamento após autenticação
 
-### 3. Problemas com Cookies e Sessão
+6. **Redirecionamentos no Supabase Web**:
+   - Site URL não configurada corretamente no Dashboard Supabase
+   - URLs de redirecionamento ausentes na lista de Redirect URLs permitidos
 
-- O middleware não estava tratando corretamente os cookies durante a autenticação
-- A atualização das sessões não estava funcionando corretamente após o login
-- Os redirects após autenticação não estavam funcionando
+## Ações Corretivas Implementadas
 
-### 4. Arquivo .env.local Corrompido
+1. **Padronização das Bibliotecas Supabase**:
+   - Removida a biblioteca @supabase/ssr para eliminar conflitos
+   - Atualizada a biblioteca @supabase/auth-helpers-nextjs para versão mais recente
+   - Padronizado o uso de funções do Supabase em todo o projeto
 
-O arquivo .env.local estava com a chave SUPABASE_ANON_KEY truncada/corrompida, impedindo a autenticação adequada.
+2. **Correção da Separação Cliente/Servidor**:
+   - Modificado o arquivo `index.ts` para exportar apenas funções do cliente
+   - Garantido que funções de servidor são importadas diretamente apenas em componentes servidor
 
-### 5. Problemas na Rota de Callback
+3. **Correção do Middleware**:
+   - Substituído o uso de `createServerClient` por `createMiddlewareClient` da biblioteca auth-helpers-nextjs
+   - Simplificado o gerenciamento de cookies no middleware
 
-A rota `/auth/callback` não estava processando corretamente o código de autorização do Supabase.
+4. **Correção do arquivo .env.local**:
+   - Recriado o arquivo .env.local com as chaves completas e corretas:
+     ```
+     NEXT_PUBLIC_SUPABASE_URL=https://wazpvqchpwzhaynwujtf.supabase.co
+     NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhenB2cWNocHd6aGF5bnd1anRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTI0MTUwNjAsImV4cCI6MjAyNzk5MTA2MH0.rzpKSTuHCRqwTp0XOh80oWDPAWw8-om69hDZU5Q8BdA
+     ```
 
-## Soluções Implementadas
+5. **Melhoria na Rota de Callback**:
+   - Reescrita a rota `/auth/callback` para processar corretamente o código de autenticação
+   - Adicionados logs detalhados para depuração
+   - Melhorado o tratamento de erros e redirecionamentos
 
-### 1. Padronização das Bibliotecas Supabase
+6. **Melhoria no Componente LoginForm**:
+   - Substituído `createClientSupabaseClient` por `createClientComponentClient` do auth-helpers-nextjs
+   - Adicionados logs detalhados para depuração
+   - Melhorado o redirecionamento após autenticação
+   - Adicionada verificação de sessão após autenticação
 
-- Removida a mistura de diferentes bibliotecas
-- Padronização para usar apenas `@supabase/auth-helpers-nextjs` para componentes cliente
-- Uso de `createClientComponentClient` no lado do cliente e correto uso do `createServerClient` no lado do servidor
+## Arquivos Modificados
 
-### 2. Separação Clara de Cliente/Servidor
+1. **src/lib/supabase/client.ts**:
+   - Removida dependência de `@supabase/ssr`
+   - Substituído `createBrowserClient` por `createClientComponentClient`
 
-- Modificação do arquivo `index.ts` para exportar apenas funções do cliente
-- Importação direta das funções de servidor apenas em componentes servidor
+2. **src/lib/supabase/server.ts**:
+   - Removida dependência de `@supabase/ssr`
+   - Substituído `createServerClient` por `createServerComponentClient`
 
-### 3. Correção do Fluxo de Autenticação
+3. **src/middleware.ts**:
+   - Simplificada a lógica de gerenciamento de cookies
+   - Substituído `createServerClient` por `createMiddlewareClient`
 
-- Adição de logs detalhados para depuração
-- Implementação do método `refreshSession()` após login bem-sucedido
-- Uso de `window.location.href` em vez de `router.push()` para forçar navegação completa
+4. **src/app/auth/callback/route.ts**:
+   - Melhorado o tratamento de erros
+   - Adicionados logs detalhados
+   - Implementada verificação de sessão após troca de código
 
-### 4. Correção do arquivo .env.local
+5. **src/components/auth/LoginForm.tsx**:
+   - Substituído cliente Supabase personalizado por `createClientComponentClient`
+   - Adicionados logs detalhados
+   - Melhorado o redirecionamento após autenticação
 
-- Recriação do arquivo .env.local com as chaves completas e corretas
+## Passos Adicionais Recomendados
 
-### 5. Melhoria na Rota de Callback
+1. **Verificar configurações no Dashboard do Supabase**:
+   - Acesse Authentication → Settings → URL Configuration
+   - Certifique-se que a Site URL é `http://localhost:3000` (em desenvolvimento)
+   - Adicione `http://localhost:3000/auth/callback` à lista de Redirect URLs
 
-- Implementação adequada da rota `/auth/callback`
-- Adição de mais logs para depuração
-- Estruturação correta dos redirecionamentos após processamento do código
+2. **Reiniciar completamente o servidor de desenvolvimento**:
+   - Pare o servidor atual (`Ctrl+C`)
+   - Execute `npm run dev` novamente
 
-## Problemas Técnicos Específicos
-
-1. Erro em `server-queries.ts`:
-   - Estava usando tipo genérico `<Database>` incorretamente com `createServerClient`
-
-2. Erro de tipos no arquivo `utils.ts`:
-   - Importação incorreta de `clsx` como importação nomeada em vez de default
-
-3. Erro nos componentes cliente tentando acessar API de servidor:
-   ```
-   You're importing a component that needs next/headers. That only works in a Server Component but one of its parents is marked with "use client", so it's a Client Component.
-   ```
-
-4. Problema no arquivo `agenda.ts`:
-   - Erro de tipagem: `Argument of type '{ therapist_id: string; start_utc: string; end_utc: string; status: string; }' is not assignable to parameter of type 'never'.`
-   - Corrigido usando `Omit<Slot, 'id'>[]` para o array de slots
-
-## Estado Atual
-
-Após as correções, o formulário de login foi modificado para:
-1. Usar a biblioteca correta do Supabase
-2. Adicionar logs detalhados para depuração
-3. Implementar um método de redirecionamento mais robusto usando navegação direta
-4. Corrigir inconsistências no processo de autenticação
-
-A rota de callback também foi melhorada para lidar corretamente com o código de autorização do Supabase e redirecionar adequadamente para o dashboard após autenticação bem-sucedida.
-
-Apesar destas correções, é importante verificar:
-1. Se o arquivo .env.local está completo e não corrompido
-2. Se as URLs de redirecionamento estão corretamente configuradas no painel do Supabase
-3. Se as versões das bibliotecas em package.json estão compatíveis entre si
+3. **Limpar cache do navegador**:
+   - Limpe cookies e cache relacionados ao domínio da aplicação
+   - Faça logout em todas as sessões existentes antes de testar

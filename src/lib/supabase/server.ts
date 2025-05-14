@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 
 // Helper para lidar com valores padrão durante o build
@@ -62,25 +62,11 @@ export const createClient = async () => {
       return mockClient;
     }
 
-    const cookieStore = await cookies()
+    const cookieStore = cookies()
     
-    return createServerClient(
-      getSupabaseUrl(),
-      getSupabaseAnonKey(),
-      {
-        cookies: {
-          get(name) {
-            return cookieStore.get(name)?.value
-          },
-          set(name, value, options) {
-            cookieStore.set({ name, value, ...options })
-          },
-          remove(name, options) {
-            cookieStore.set({ name, value: '', ...options })
-          },
-        },
-      }
-    )
+    return createServerComponentClient({
+      cookies: () => cookieStore
+    })
   } catch (error) {
     console.error('Erro ao criar cliente Supabase:', error);
     return mockClient;
@@ -96,25 +82,11 @@ export const createRouteClient = async () => {
       return mockClient;
     }
 
-    const cookieStore = await cookies()
+    const cookieStore = cookies()
     
-    return createServerClient(
-      getSupabaseUrl(),
-      getSupabaseAnonKey(),
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-          set(name: string, value: string, options: any) {
-            cookieStore.set({ name, value, ...options })
-          },
-          remove(name: string, options: any) {
-            cookieStore.set({ name, value: '', ...options })
-          },
-        },
-      }
-    )
+    return createServerComponentClient({
+      cookies: () => cookieStore
+    })
   } catch (error) {
     console.error('Erro ao criar cliente Supabase para rota de API:', error);
     return mockClient;

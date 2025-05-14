@@ -1,4 +1,4 @@
-import { createBrowserClient } from '@supabase/ssr'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 // Helper para lidar com valores padrão durante o build
 const getSupabaseUrl = () => {
@@ -100,10 +100,10 @@ export const createClient = () => {
       return mockSupabase;
     }
     
-    return createBrowserClient(
-      getSupabaseUrl(),
-      getSupabaseAnonKey()
-    );
+    return createClientComponentClient({
+      supabaseUrl: getSupabaseUrl(),
+      supabaseKey: getSupabaseAnonKey()
+    });
   } catch (error) {
     console.error('Erro ao criar cliente Supabase, usando autenticação simulada:', error);
     return mockSupabase;

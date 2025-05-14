@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr'
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -21,73 +21,21 @@ const PROTECTED_ROUTES = ['/app/(.*)'];
 
 export async function middleware(request: NextRequest) {
   try {
-    // Criar uma resposta vazia para começar
-    let response = NextResponse.next({
-      request: {
-        headers: request.headers,
-      },
-    })
+    // Criar resposta padrão
+    let response = NextResponse.next()
     
-    // Criar o cliente Supabase para o middleware
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return request.cookies.get(name)?.value
-          },
-          set(name: string, value: string, options: any) {
-            // Quando configuramos cookies no middleware, precisamos definir tanto no request quanto na response
-            request.cookies.set({
-              name,
-              value,
-              ...options,
-            })
-            response = NextResponse.next({
-              request: {
-                headers: request.headers,
-              },
-            })
-            response.cookies.set({
-              name,
-              value,
-              ...options,
-            })
-          },
-          remove(name: string, options: any) {
-            // Quando removemos cookies no middleware, precisamos fazer no request e na response
-            request.cookies.set({
-              name,
-              value: '',
-              ...options,
-            })
-            response = NextResponse.next({
-              request: {
-                headers: request.headers,
-              },
-            })
-            response.cookies.set({
-              name,
-              value: '',
-              ...options,
-            })
-          },
-        },
-      }
-    )
+    // Criar o cliente Supabase para o middleware usando a biblioteca auth-helpers-nextjs
+    const supabase = createMiddlewareClient({ req: request, res: response })
 
-    // Verificar autenticação com getUser() em vez de getSession()
-    // getUser() é mais confiável pois sempre verifica com o servidor
-    const { data, error } = await supabase.auth.getUser()
-    const user = data?.user
-    const hasValidSession = !!user
+    // Verificar a sessão e atualizar os cookies de autenticação
+    const { data: { session } } = await supabase.auth.getSession()
+    const hasValidSession = !!session
 
     // Log para depuração
     console.log('Middleware - URL:', request.nextUrl.pathname)
     console.log('Middleware - User:', hasValidSession ? 'Autenticado' : 'Não autenticado')
     if (hasValidSession) {
-      console.log('Middleware - User ID:', user.id)
+      console.log('Middleware - User ID:', session.user.id)
     }
 
     // Verificar se a rota atual é protegida
