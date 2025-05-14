@@ -20,84 +20,119 @@ const PUBLIC_ROUTES = [
 const PROTECTED_ROUTES = ['/app/(.*)'];
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  })
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
-        },
-        set(name: string, value: string, options: any) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-        },
-        remove(name: string, options: any) {
-          request.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-        },
+  try {
+    // Criar uma resposta vazia para começar
+    let response = NextResponse.next({
+      request: {
+        headers: request.headers,
       },
+    })
+    
+    // Criar o cliente Supabase para o middleware
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return request.cookies.get(name)?.value
+          },
+          set(name: string, value: string, options: any) {
+            // Quando configuramos cookies no middleware, precisamos definir tanto no request quanto na response
+            request.cookies.set({
+              name,
+              value,
+              ...options,
+            })
+            response = NextResponse.next({
+              request: {
+                headers: request.headers,
+              },
+            })
+            response.cookies.set({
+              name,
+              value,
+              ...options,
+            })
+          },
+          remove(name: string, options: any) {
+            // Quando removemos cookies no middleware, precisamos fazer no request e na response
+            request.cookies.set({
+              name,
+              value: '',
+              ...options,
+            })
+            response = NextResponse.next({
+              request: {
+                headers: request.headers,
+              },
+            })
+            response.cookies.set({
+              name,
+              value: '',
+              ...options,
+            })
+          },
+        },
+      }
+    )
+
+    // Verificar autenticação com getUser() em vez de getSession()
+    // getUser() é mais confiável pois sempre verifica com o servidor
+    const { data, error } = await supabase.auth.getUser()
+    const user = data?.user
+    const hasValidSession = !!user
+
+    // Log para depuração
+    console.log('Middleware - URL:', request.nextUrl.pathname)
+    console.log('Middleware - User:', hasValidSession ? 'Autenticado' : 'Não autenticado')
+    if (hasValidSession) {
+      console.log('Middleware - User ID:', user.id)
     }
-  )
 
-  // Atualizar a sessão do usuário se existir
-  const { data: { session } } = await supabase.auth.getSession()
+    // Verificar se a rota atual é protegida
+    const url = request.nextUrl.pathname
+    const isProtectedRoute = PROTECTED_ROUTES.some(route => {
+      const regex = new RegExp(`^${route.replace(/\(\.\*\)/g, '.*')}$`)
+      return regex.test(url)
+    })
+    
+    const isPublicRoute = PUBLIC_ROUTES.some(route => {
+      const regex = new RegExp(`^${route.replace(/\(\.\*\)/g, '.*')}$`)
+      return regex.test(url)
+    })
 
-  // Verificar se a rota atual é protegida
-  const url = request.nextUrl.pathname
-  const isProtectedRoute = PROTECTED_ROUTES.some(route => {
-    const regex = new RegExp(`^${route.replace(/\(\.\*\)/g, '.*')}$`)
-    return regex.test(url)
-  })
-  
-  const isPublicRoute = PUBLIC_ROUTES.some(route => {
-    const regex = new RegExp(`^${route.replace(/\(\.\*\)/g, '.*')}$`)
-    return regex.test(url)
-  })
+    // Redirecionar para login se a rota for protegida e o usuário não estiver autenticado
+    if (isProtectedRoute && !hasValidSession) {
+      console.log('Middleware - Redirecionando para login, rota protegida sem sessão')
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
 
-  // Redirecionar para login se a rota for protegida e o usuário não estiver autenticado
-  if (isProtectedRoute && !session) {
-    return NextResponse.redirect(new URL('/login', request.url))
+    // Redirecionar para o dashboard se o usuário estiver autenticado e acessar rotas de auth
+    if (hasValidSession && (url === '/login' || url === '/register')) {
+      console.log('Middleware - Redirecionando para dashboard, usuário autenticado acessando rotas de auth')
+      return NextResponse.redirect(new URL('/app/dashboard', request.url))
+    }
+
+    console.log('Middleware - Continuando navegação normal')
+    return response
+  } catch (error) {
+    console.error('Middleware - Erro ao processar requisição:', error)
+    
+    // Em caso de erro, direcionar para rotas públicas por segurança
+    const url = request.nextUrl.pathname
+    const isProtectedRoute = PROTECTED_ROUTES.some(route => {
+      const regex = new RegExp(`^${route.replace(/\(\.\*\)/g, '.*')}$`)
+      return regex.test(url)
+    })
+    
+    if (isProtectedRoute) {
+      console.log('Middleware - Erro ao autenticar usuário, redirecionando para login')
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+    
+    return NextResponse.next()
   }
-
-  // Redirecionar para o dashboard se o usuário estiver autenticado e acessar rotas de auth
-  if (session && url.includes('/login') || session && url.includes('/register')) {
-    return NextResponse.redirect(new URL('/app/dashboard', request.url))
-  }
-
-  return response
 }
 
 export const config = {

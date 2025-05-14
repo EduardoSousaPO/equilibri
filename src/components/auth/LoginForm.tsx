@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClientSupabaseClient } from '@/lib/supabase/client-queries'
+import { createClientSupabaseClient } from '@/lib/supabase'
 
 export function LoginForm() {
   const [email, setEmail] = useState('')
@@ -11,8 +11,6 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const redirectPath = searchParams.get('redirect')
   const supabase = createClientSupabaseClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,51 +19,59 @@ export function LoginForm() {
     setIsLoading(true)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      })
-
-      if (error) {
-        throw error
-      }
-
-      router.refresh()
+      console.log('Iniciando processo de login com email:', email)
       
-      // Redirecionar com base no parâmetro da URL, se existir
-      if (redirectPath) {
-        router.push(`/${redirectPath}`)
-      } else {
-        router.push('/dashboard')
+      // Login com email/senha
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      
+      if (error) {
+        console.error('Erro de autenticação:', error.message)
+        setError('Falha na autenticação: ' + error.message)
+        setIsLoading(false)
+        return
       }
-    } catch (error: any) {
-      console.error('Erro no login:', error)
-      setError(error.message || 'Ocorreu um erro ao fazer login. Tente novamente.')
-    } finally {
+      
+      console.log('Login bem-sucedido, usuário:', data.user?.id)
+      console.log('Session:', !!data.session ? 'Disponível' : 'Indisponível')
+      
+      // Forçar uma atualização da sessão nos cookies
+      const { error: refreshError } = await supabase.auth.refreshSession()
+      if (refreshError) {
+        console.warn('Aviso: Não foi possível atualizar a sessão:', refreshError.message)
+      } else {
+        console.log('Sessão atualizada com sucesso')
+      }
+      
+      // Verificar se já temos uma sessão válida imediatamente 
+      const { data: sessionData } = await supabase.auth.getSession()
+      console.log('Estado da sessão após login:', !!sessionData.session ? 'Ativa' : 'Inativa')
+      
+      // Redirecionar para dashboard usando window.location para forçar navegação completa
+      console.log('Redirecionando para dashboard usando window.location...')
+      window.location.href = '/app/dashboard'
+    } catch (e: any) {
+      console.error('Exceção durante o login:', e.message || e)
+      setError('Erro inesperado: ' + (e.message || 'Falha na conexão'))
       setIsLoading(false)
     }
   }
-
+  
   return (
-    <div className="w-full max-w-md space-y-6">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-primary">Acesse o Equilibri.IA</h1>
-        <p className="text-text-secondary">
-          {redirectPath === 'chat' 
-            ? 'Faça login para conversar com Lari, sua terapeuta digital'
-            : 'Faça login para continuar sua jornada terapêutica'}
-        </p>
-      </div>
+    <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-md">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">Entrar no DiarioTER</h2>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div className="bg-red-50 p-3 rounded-md text-red-700 text-sm">
-            {error}
-          </div>
-        )}
-        
-        <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium text-text-primary">
+      {error && (
+        <div className="bg-red-50 text-red-500 p-3 rounded-md mb-4">
+          {error}
+        </div>
+      )}
+      
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label htmlFor="email" className="block text-gray-700 mb-2">
             Email
           </label>
           <input
@@ -74,17 +80,16 @@ export function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white"
-            placeholder="seu@email.com"
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label htmlFor="password" className="block text-sm font-medium text-text-primary">
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-2">
+            <label htmlFor="password" className="block text-gray-700">
               Senha
             </label>
-            <Link href="/auth/reset-password" className="text-sm text-primary hover:underline">
+            <Link href="/reset-password" className="text-sm text-blue-500 hover:text-blue-700">
               Esqueceu a senha?
             </Link>
           </div>
@@ -94,25 +99,26 @@ export function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white"
-            placeholder="••••••••"
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-2 px-4 bg-primary text-white rounded-md hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className={`w-full p-2 rounded-md text-white font-medium ${
+            isLoading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
+          }`}
         >
           {isLoading ? 'Entrando...' : 'Entrar'}
         </button>
       </form>
       
-      <div className="text-center">
-        <p className="text-sm text-text-secondary">
-          Não tem uma conta?{' '}
-          <Link href={redirectPath ? `/register?redirect=${redirectPath}` : "/register"} className="text-primary hover:underline">
-            Cadastre-se
+      <div className="mt-4 text-center">
+        <p className="text-gray-600">
+          Ainda não tem uma conta?{' '}
+          <Link href="/register" className="text-blue-500 hover:text-blue-700">
+            Registre-se
           </Link>
         </p>
       </div>

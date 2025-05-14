@@ -1,148 +1,17 @@
-(branch refactor/core-unification → abrir PR em main)
-
-0 · OBJETIVO GERAL
-Essencializar toda a navegação (tudo via /chat, /dashboard, /settings).
-
-Pacotes claros
-
-Free 30 mensagens/mês.
-
-Premium Ilimitado + Relatórios PDF.
-
-Premium Clínico Tudo do Premium + 1 videossessão de 60 min/mês com psicóloga (agenda interna).
-
-Agenda integrada — usuário vê apenas slots que a psicóloga liberou; ao reservar, o slot some. Uma única psicóloga = nunca dois usuários no mesmo horário.
-
-Copy/UI reforçando “Equilibri.IA ≠ ChatGPT” + diferencial HUMANO.
-
-1 · NOVAS ROTAS
-bash
-Copiar
-Editar
-/chat          interação com Lari (texto·voz·check-in)
-/dashboard     mood-chart, highlights, PDF (se premium)
-/settings      plano, upgrade, privacidade
-/agenda        reservar sessão mensal (só Premium Clínico)
-/admin/agenda  (somente role 'therapist') cadastrar slots
-2 · BANCO SUPABASE
-sql
-Copiar
-Editar
--- psicóloga
-CREATE TABLE therapists (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id uuid REFERENCES auth.users,  -- login da psicóloga
-  name text,
-  crp  text,
-  timezone text
-);
--- horários ofertados
-CREATE TABLE slots (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  therapist_id uuid REFERENCES therapists(id),
-  start_utc timestamptz,
-  end_utc   timestamptz,
-  status text CHECK (status IN ('free','booked')) DEFAULT 'free'
-);
--- agendamentos
-CREATE TABLE appointments (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  slot_id uuid REFERENCES slots(id) UNIQUE,
-  user_id uuid REFERENCES auth.users,
-  meet_link text,
-  notes text
-);
-Policy: user pode select slots status='free'; psicóloga pode insert/update em sua agenda; ninguém vê slots de outros terapeutas.
-
-3 · API / LIB
-ts
-Copiar
-Editar
-// lib/agenda.ts
-export async function listFreeSlots() { ... }
-export async function bookSlot(userId, slotId) {
-  // 1) update slots set status='booked'
-  // 2) create appointments row + meet_link (Google Calendar API)
-}
-Google Calendar token salvo em therapists.calendar_credentials.
-
-Função serverless gera evento + Meet link e armazena.
-
-4 · UI
-4.1 /agenda (usuário Premium Clínico)
-tsx
-Copiar
-Editar
-<CalendarMonth>
-  {slots.map(s => <SlotButton ... disabled={status!=='free'} />)}
-</CalendarMonth>
-Clica → modal “Confirmar sessão 14 Jun 19 h?” → bookSlot.
-
-Após reservar, aparece card com link Meet + botão “Adicionar ao Google Calendar”.
-
-4.2 /admin/agenda
-Form para psicóloga escolher dia, hora, duração; gera vários slots “free”.
-
-Lista seus slots (free/booked).
-
-5 · PLANOS & LIMITE
-Plano	Limite chat	Sessão humana	BD flag
-Free	30/mês	—	'free'
-Premium	Ilimitado	—	'pro'
-Premium Clínico	Ilimitado	1×60 min/mês	'clinical'
-
-Edge function /functions/reset_limits.ts “dia 1” → zera msg_count e session_used (para clinical).
-
-No bookSlot se session_used = 1 → bloquear (até próximo mês).
-
-6 · ONSCREEN COPY (por que não ChatGPT)
-Componente WhyNotGPT.tsx (landing & modal upgrade):
-
-Equilibri.IA	ChatGPT
-IA empática + Plano Terapêutico Dinâmico	Prompt manual
-Registro de humor & gráfico	✖
-PDF pronto p/ terapeuta	✖
-Sessão mensal 1 h com psicóloga	✖
-Dados privados no Brasil	Armazenados fora
-
-7 · ONBOARDING AJUSTADO
-Cadastro → emoji → chat.
-
-Banner se plano 'clinical':
-
-“Agende sua sessão de 1 h este mês” → botão /agenda.
-
-8 · UI BANNERS (settings)
-Free – “30 mensagens/mês · Plano Terapêutico · Grátis”.
-
-Premium – “Ilimitado · PDF · R$ 39,90”.
-
-Premium Clínico – “Ilimitado + Sessão 1 h c/ psicóloga · R$ 179”.
-
-9 · BLOQUEIOS
-sendMessage() verifica:
-
-ts
-Copiar
-Editar
-if (plan==='free' && msg_count>=30) openModalUpgrade();
-Agenda bloqueia se slot já booked ou session_used=1.
-
-10 · TESTES & DEPLOY
-Psicóloga acessa /admin/agenda, cria 5 slots.
-
-Usuário 'clinical' vê slots, reserva 1 → slot some.
-
-Outro usuário não vê slot retirado.
-
-Lari continua chat; dashboard gera PDF; cron zera contadores.
-
-DONE
-“Commits atomizados: chat-fusion, dashboard, agenda-user, admin-agenda, copy-whynot, plans. PR pronto e marca @product.”
-
-
-
-
-
+Correções e Implementações Pendentes no Projeto Equilibri:
+Integrar Check-in Emocional no Chat: Incluir no componente de chat uma forma do usuário registrar seu estado emocional atual (check-in). Por exemplo, adicionar um botão ou menu no /chat que permita selecionar um humor (emoji/escala) ou um comando que faça a Lari perguntar “Como você se sente agora?”. Garantir que esses dados sejam salvos corretamente (ex: em uma tabela de humores ou junto à mensagem) e posteriormente utilizados para compor o gráfico de humor no /dashboard. Remover quaisquer referências remanescentes à página /checkin antiga e centralizar completamente essa função no chat.
+Implementar Exportação de PDF no Dashboard: No painel /dashboard, adicionar a funcionalidade de gerar relatório PDF com os dados do usuário (humor ao longo do tempo, destaques do diário/chat, etc.). Criar um botão “Exportar PDF” que ao ser clicado chame uma função backend (serverless) para montar o relatório. Pode-se usar uma biblioteca como pdfkit ou similar para compor o PDF. Garantir que apenas usuários autenticados possam gerar seu relatório e, se for o caso, armazenar ou enviar esse PDF (download direto no navegador). Testar a geração com dados reais para validar formatação (gráficos, textos, etc.).
+Reset Mensal de Contadores (Plano Free): Implementar uma rotina automática que reinicie o contador de mensagens dos usuários Free todo mês. Pode ser uma função agendada (cron job) ou trigger no backend que zere o campo de contagem mensal na virada de cada mês. Assegurar que após o reset os usuários Free tenham novamente 30 mensagens disponíveis no novo período. Além disso, exibir de forma clara ao usuário que o contador refere-se ao mês corrente (por exemplo, “X mensagens restantes este mês” já está ok). Testar a transição de mês para confirmar que o contador volta a 30 e que o bloqueio/desbloqueio de envio funciona conforme esperado ao longo do tempo.
+Finalizar Fluxo de Agendamento de Sessões: Revisar e completar a lógica de reserva de horários na agenda de sessões:
+No front-end (/agenda): Listar corretamente os slots disponíveis recuperados do banco. Permitir que o usuário Premium Clínico selecione um horário e confirme a reserva. Implementar a chamada ao backend (ou diretamente ao supabase, se for o caso) para criar um registro em appointments vinculando o usuário ao slot escolhido. Após reserva, dar feedback ao usuário (e.g., mensagem de confirmação) e remover aquele slot da lista disponível.
+No back-end: Garantir regras de negócio: um slot só pode ser reservado uma vez (status muda para “booked”), usuários só podem ver e reservar slots com status “free” e relativos a psicólogas disponíveis. Psicólogas só veem seus slots no admin. Adicionar validações de segurança necessárias (verificar plano do usuário antes de reservar, verificar autenticidade da requisição, etc.).
+Integração Calendar/Meet: Se possível, integrar a confirmação de agendamento com a criação de um evento no Google Calendar da psicóloga e do paciente. Utilizar as calendar_credentials da tabela therapists para autenticar e criar um evento via API do Google Calendar, incluindo data/hora do slot e um link de Google Meet. Caso a integração não esteja pronta, deixar claro para o usuário o passo seguinte (por ex., “A psicóloga entrará em contato com o link da sessão” ou enviar um email de confirmação como placeholder).
+Testar o fluxo completo: login como psicóloga -> cadastrar slot em /admin/agenda -> login como usuário Premium Clínico -> reservar slot em /agenda -> verificar indisponibilidade do slot posteriormente e criação do appointment. Garantir que todos esses passos funcionem sem erros.
+Ajustes de UI/UX e Navegação:
+Renomear, se necessário, o item “Diário” da navbar para “Dashboard” ou outro termo que reflita o novo painel de humor, evitando confusão com a antiga funcionalidade de diário.
+Introduzir o componente informativo “WhyNotGPT” na interface (por exemplo, na página de chat ou homepage), conforme mencionado no plano, destacando os diferenciais da Lari em relação a um chatbot genérico.
+Incluir banners ou indicações dos benefícios de cada plano (Free, Premium, Premium Clínico) em locais estratégicos – por exemplo, na página de upgrade ou configurações – para lembrar o usuário das vantagens ao considerar um upgrade.
+Verificar responsividade e visual da UI após as mudanças, aprimorando a experiência em mobile conforme necessário (otimização mencionada nos próximos passos do plano).
+Integração de Pagamentos (Upgrade de Plano): Implementar a conexão com um gateway de pagamento para efetivar upgrades. Por enquanto, o botão “Fazer Upgrade” pode redirecionar para uma página de planos onde o usuário seleciona o novo plano. Integre, por exemplo, com a API do Stripe ou outro provedor para criar a assinatura. Ao confirmar o pagamento, atualizar no banco o plano do usuário (Free -> Premium ou Premium Clínico) e ajustar imediatamente seus limites (ilimitado de mensagens, acesso à agenda, etc.). Assim, o upgrade deixa de ser apenas simulado e passa a ser funcional. Testar com um fluxo de sandbox do provedor escolhido para garantir que a mudança de plano ocorre sem intervenção manual.
 
 

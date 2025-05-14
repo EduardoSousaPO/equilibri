@@ -215,7 +215,7 @@ export async function createSlots(
   const supabase = getSupabaseServer();
   
   // Criar slots
-  const slots = [];
+  const slots: Omit<Slot, 'id'>[] = [];
   let currentTime = new Date(startDate);
   
   while (currentTime < endDate) {

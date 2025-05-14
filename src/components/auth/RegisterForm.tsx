@@ -60,7 +60,7 @@ export function RegisterForm() {
         if (redirectPath) {
           router.push(`/${redirectPath}`)
         } else {
-          router.push('/dashboard')
+          router.push('/app/dashboard')
         }
       }
     } catch (error: any) {

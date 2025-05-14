@@ -5,6 +5,10 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import { format, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Button } from '@/components/ui/button';
+import { Toast } from '@/components/ui/toast';
+import { generateMonthlyReport, PdfReport } from '@/utils/pdf';
+import { MoodEntry, Highlight, ChatMessage } from '@/utils/pdf';
 
 // Componentes mock (a serem substituídos pelos reais)
 const MoodChart = ({ moodData }: { moodData: any[] }) => (
@@ -52,9 +56,26 @@ const Highlights = ({ highlights }: { highlights: any[] }) => (
   </div>
 );
 
-const PdfReports = ({ reports }: { reports: any[] }) => (
+const PdfReports = ({ reports, onGenerateReport, isGenerating, isUserAllowed }: { 
+  reports: PdfReport[]; 
+  onGenerateReport: () => void;
+  isGenerating: boolean;
+  isUserAllowed: boolean;
+}) => (
   <div className="rounded-lg border p-4 bg-card">
-    <h3 className="text-xl font-semibold mb-4">Relatórios PDF</h3>
+    <div className="flex justify-between items-center mb-4">
+      <h3 className="text-xl font-semibold">Relatórios PDF</h3>
+      {isUserAllowed && (
+        <Button 
+          onClick={onGenerateReport} 
+          disabled={isGenerating}
+          size="sm"
+        >
+          {isGenerating ? 'Gerando...' : 'Exportar PDF'}
+        </Button>
+      )}
+    </div>
+    
     {reports.length > 0 ? (
       <div className="space-y-2">
         {reports.map((report, i) => (
@@ -85,10 +106,11 @@ const PdfReports = ({ reports }: { reports: any[] }) => (
     ) : (
       <div className="text-center py-6 text-muted-foreground">
         <p>Nenhum relatório disponível</p>
-        {/* Se não for premium, mostrar mensagem sobre upgrade */}
+        {!isUserAllowed && (
         <p className="mt-2 text-sm">
           Assine o plano Premium para gerar relatórios PDF para seu terapeuta.
         </p>
+        )}
       </div>
     )}
   </div>
@@ -100,11 +122,18 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userPlan, setUserPlan] = useState<string>('free');
+  const [userName, setUserName] = useState<string>('');
+  const [userId, setUserId] = useState<string>('');
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
   
   // Dados simulados para os componentes
-  const [moodData, setMoodData] = useState<any[]>([]);
-  const [highlights, setHighlights] = useState<any[]>([]);
-  const [reports, setReports] = useState<any[]>([]);
+  const [moodData, setMoodData] = useState<MoodEntry[]>([]);
+  const [highlights, setHighlights] = useState<Highlight[]>([]);
+  const [reports, setReports] = useState<PdfReport[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
     async function fetchUserData() {
@@ -116,20 +145,22 @@ export default function Dashboard() {
           return;
         }
         
-        // Buscar plano do usuário
+        setUserId(user.id);
+        
+        // Buscar perfil do usuário
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('plan')
+          .select('plan, name')
           .eq('id', user.id)
           .single();
           
         if (profileError) throw profileError;
         
         setUserPlan(profile.plan);
+        setUserName(profile.name || 'Usuário');
         
         // Gerar dados simulados para os componentes
-        // Em um app real, esses dados viriam do banco
-        generateMockData();
+        await fetchDashboardData(user.id);
         
       } catch (err) {
         console.error('Erro ao carregar dados:', err);
@@ -142,8 +173,107 @@ export default function Dashboard() {
     fetchUserData();
   }, [supabase, router]);
 
-  // Função para gerar dados de teste
-  const generateMockData = () => {
+  const fetchDashboardData = async (userId: string) => {
+    try {
+      // Buscar dados de humor (emotion_checkins)
+      const { data: emotionData } = await supabase
+        .from('emotion_checkins')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(14);
+      
+      if (emotionData && emotionData.length > 0) {
+        // Converter dados do banco para o formato esperado
+        const moodEntries: MoodEntry[] = emotionData.map(entry => ({
+          date: new Date(entry.created_at),
+          value: entry.intensity,
+          note: entry.note
+        }));
+        
+        setMoodData(moodEntries);
+      } else {
+        // Gerar dados mock se não houver dados reais
+        generateMockMoodData();
+      }
+      
+      // Buscar mensagens relevantes do chat
+      const { data: chatMessages } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(30);
+      
+      if (chatMessages) {
+        // Extrair possíveis destaques das mensagens
+        const processedHighlights = processMessagesForHighlights(chatMessages);
+        setHighlights(processedHighlights);
+        
+        // Armazenar mensagens para o relatório
+        setMessages(chatMessages.map(msg => ({
+          role: msg.role,
+          content: msg.content,
+          timestamp: new Date(msg.created_at)
+        })));
+      } else {
+        // Gerar destaques mock
+        generateMockHighlights();
+      }
+      
+      // Buscar relatórios existentes
+      const { data: existingReports } = await supabase
+        .from('user_reports')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+      
+      if (existingReports && existingReports.length > 0) {
+        setReports(existingReports.map(report => ({
+          title: report.title,
+          date: new Date(report.created_at),
+          url: report.file_url
+        })));
+      }
+      
+    } catch (error) {
+      console.error('Erro ao buscar dados do dashboard:', error);
+    }
+  };
+
+  const processMessagesForHighlights = (messages: any[]): Highlight[] => {
+    // Lógica para extrair destaques das mensagens
+    // Este é um exemplo simplificado
+    const highlights: Highlight[] = [];
+    
+    for (const msg of messages) {
+      // Apenas mensagens do assistente que parecem conter informações importantes
+      if (msg.role === 'assistant' && 
+          (msg.content.includes('importante') || 
+           msg.content.includes('progresso') || 
+           msg.content.includes('conseguiu'))) {
+        
+        // Extrai uma parte relevante da mensagem
+        const content = msg.content.length > 120 
+          ? msg.content.substring(0, 120) + '...' 
+          : msg.content;
+          
+        highlights.push({
+          title: 'Destaque da conversa',
+          content,
+          date: new Date(msg.created_at)
+        });
+        
+        // Limitar a quantidade de destaques
+        if (highlights.length >= 3) break;
+      }
+    }
+    
+    return highlights;
+  };
+
+  // Função para gerar dados de humor mock
+  const generateMockMoodData = () => {
     // Gerar dados de humor para os últimos 14 dias
     const moodEntries = Array.from({ length: 14 }, (_, i) => {
       // Gerar valores entre 1 e 5, com tendência a melhorar com o tempo
@@ -160,8 +290,10 @@ export default function Dashboard() {
     });
     
     setMoodData(moodEntries);
+  };
     
-    // Gerar destaques
+  // Gerar destaques mock
+  const generateMockHighlights = () => {
     setHighlights([
       {
         title: 'Progresso na ansiedade social',
@@ -179,23 +311,52 @@ export default function Dashboard() {
         date: subDays(new Date(), 8),
       },
     ]);
+  };
+
+  // Gerar e salvar relatório PDF
+  const handleGenerateReport = async () => {
+    if (!userId || !userName) {
+      setToastMessage('Erro: Dados do usuário não disponíveis');
+      setToastType('error');
+      setShowToast(true);
+      return;
+    }
     
-    // Relatórios PDF (apenas para planos premium)
-    if (userPlan === 'pro' || userPlan === 'clinical') {
-      setReports([
-        {
-          title: 'Relatório Mensal - Julho 2023',
-          date: new Date(2023, 6, 30), // Julho (0-indexed)
-          url: '#', // Seria um link real para o PDF
-        },
-        {
-          title: 'Relatório Mensal - Junho 2023',
-          date: new Date(2023, 5, 30), // Junho
-          url: '#',
-        },
-      ]);
+    setIsGeneratingPdf(true);
+    
+    try {
+      // Gerar o relatório
+      const report = await generateMonthlyReport(
+        userId,
+        userName,
+        moodData,
+        highlights,
+        messages
+      );
+      
+      // Em produção, aqui seria feito o upload do PDF para o Supabase Storage
+      // e salvo o registro na tabela user_reports
+      
+      // Para este exemplo, apenas adicionamos ao estado local
+      setReports(prev => [report, ...prev]);
+      
+      setToastMessage('Relatório gerado com sucesso!');
+      setToastType('success');
+    } catch (error) {
+      console.error('Erro ao gerar relatório:', error);
+      setToastMessage('Erro ao gerar relatório');
+      setToastType('error');
+    } finally {
+      setIsGeneratingPdf(false);
+      setShowToast(true);
+      
+      // Esconder o toast após 3 segundos
+      setTimeout(() => setShowToast(false), 3000);
     }
   };
+  
+  // Verificar se o usuário pode gerar relatórios
+  const canGenerateReports = userPlan === 'pro' || userPlan === 'clinical';
 
   if (loading) {
     return (
@@ -221,7 +382,12 @@ export default function Dashboard() {
       </div>
       
       <div className="mb-6">
-        <PdfReports reports={userPlan === 'free' ? [] : reports} />
+        <PdfReports 
+          reports={reports} 
+          onGenerateReport={handleGenerateReport}
+          isGenerating={isGeneratingPdf}
+          isUserAllowed={canGenerateReports}
+        />
       </div>
       
       {userPlan === 'free' && (
@@ -237,6 +403,15 @@ export default function Dashboard() {
             Fazer Upgrade
           </button>
         </div>
+      )}
+      
+      {/* Toast de notificação */}
+      {showToast && (
+        <Toast 
+          message={toastMessage}
+          type={toastType}
+          onClose={() => setShowToast(false)}
+        />
       )}
     </div>
   );

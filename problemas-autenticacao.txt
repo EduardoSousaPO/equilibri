@@ -1,0 +1,93 @@
+# Problemas de Autenticação no Projeto DiarioTER/Equilibri.IA
+
+## Problemas Identificados
+
+### 1. Inconsistências nas Bibliotecas do Supabase
+
+O projeto estava utilizando simultaneamente múltiplas bibliotecas do Supabase com diferentes versões:
+- `@supabase/auth-helpers-nextjs` - versão 0.8.7
+- `@supabase/ssr` - versão 0.0.10 (muito recente e possivelmente incompatível)
+- `@supabase/supabase-js` - versão 2.39.0
+
+Isso causava conflitos na forma como a autenticação era gerenciada, especialmente entre componentes cliente e servidor.
+
+### 2. Mistura de Paradigmas Cliente/Servidor
+
+O projeto importava funções de servidor em componentes cliente, o que violava o modelo de separação de Next.js:
+- Arquivo `index.ts` exportava tanto funções de cliente quanto de servidor
+- Componentes com `'use client'` importavam funções que usavam `cookies` do `next/headers`
+
+### 3. Problemas com Cookies e Sessão
+
+- O middleware não estava tratando corretamente os cookies durante a autenticação
+- A atualização das sessões não estava funcionando corretamente após o login
+- Os redirects após autenticação não estavam funcionando
+
+### 4. Arquivo .env.local Corrompido
+
+O arquivo .env.local estava com a chave SUPABASE_ANON_KEY truncada/corrompida, impedindo a autenticação adequada.
+
+### 5. Problemas na Rota de Callback
+
+A rota `/auth/callback` não estava processando corretamente o código de autorização do Supabase.
+
+## Soluções Implementadas
+
+### 1. Padronização das Bibliotecas Supabase
+
+- Removida a mistura de diferentes bibliotecas
+- Padronização para usar apenas `@supabase/auth-helpers-nextjs` para componentes cliente
+- Uso de `createClientComponentClient` no lado do cliente e correto uso do `createServerClient` no lado do servidor
+
+### 2. Separação Clara de Cliente/Servidor
+
+- Modificação do arquivo `index.ts` para exportar apenas funções do cliente
+- Importação direta das funções de servidor apenas em componentes servidor
+
+### 3. Correção do Fluxo de Autenticação
+
+- Adição de logs detalhados para depuração
+- Implementação do método `refreshSession()` após login bem-sucedido
+- Uso de `window.location.href` em vez de `router.push()` para forçar navegação completa
+
+### 4. Correção do arquivo .env.local
+
+- Recriação do arquivo .env.local com as chaves completas e corretas
+
+### 5. Melhoria na Rota de Callback
+
+- Implementação adequada da rota `/auth/callback`
+- Adição de mais logs para depuração
+- Estruturação correta dos redirecionamentos após processamento do código
+
+## Problemas Técnicos Específicos
+
+1. Erro em `server-queries.ts`:
+   - Estava usando tipo genérico `<Database>` incorretamente com `createServerClient`
+
+2. Erro de tipos no arquivo `utils.ts`:
+   - Importação incorreta de `clsx` como importação nomeada em vez de default
+
+3. Erro nos componentes cliente tentando acessar API de servidor:
+   ```
+   You're importing a component that needs next/headers. That only works in a Server Component but one of its parents is marked with "use client", so it's a Client Component.
+   ```
+
+4. Problema no arquivo `agenda.ts`:
+   - Erro de tipagem: `Argument of type '{ therapist_id: string; start_utc: string; end_utc: string; status: string; }' is not assignable to parameter of type 'never'.`
+   - Corrigido usando `Omit<Slot, 'id'>[]` para o array de slots
+
+## Estado Atual
+
+Após as correções, o formulário de login foi modificado para:
+1. Usar a biblioteca correta do Supabase
+2. Adicionar logs detalhados para depuração
+3. Implementar um método de redirecionamento mais robusto usando navegação direta
+4. Corrigir inconsistências no processo de autenticação
+
+A rota de callback também foi melhorada para lidar corretamente com o código de autorização do Supabase e redirecionar adequadamente para o dashboard após autenticação bem-sucedida.
+
+Apesar destas correções, é importante verificar:
+1. Se o arquivo .env.local está completo e não corrompido
+2. Se as URLs de redirecionamento estão corretamente configuradas no painel do Supabase
+3. Se as versões das bibliotecas em package.json estão compatíveis entre si
