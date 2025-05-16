@@ -12,7 +12,6 @@ import {
 } from '@/lib/supabase/client-queries';
 import { useRouter } from 'next/navigation';
 import PlanBanner from '@/components/PlanBanner';
-import WhyNotGPT from '@/components/WhyNotGPT';
 import { Button } from '@/components/ui/button';
 import { EmotionType } from '@/types/database';
 
@@ -26,10 +25,6 @@ function UpgradeModal({ onClose, onUpgrade }: { onClose: () => void; onUpgrade: 
           Você atingiu o limite de 30 mensagens para o plano gratuito. 
           Faça upgrade para o plano Premium e tenha conversas ilimitadas com a Lari.
         </p>
-        
-        <div className="mt-4 mb-4">
-          <WhyNotGPT variant="sidebar" />
-        </div>
         
         <div className="flex justify-end gap-2">
           <button
@@ -380,16 +375,15 @@ export function Chat() {
       </div>
       
       {/* Botão de check-in emocional */}
-      <div className="py-2 px-4 border-b flex justify-between items-center">
+      <div className="py-2 px-4 border-b">
         <Button 
           onClick={() => setShowEmotionCheckinModal(true)}
           variant="outline"
-          className="text-sm"
+          className="text-sm w-full"
         >
           <span className="mr-2">😊</span>
           Como você está se sentindo?
         </Button>
-        <WhyNotGPT variant="sidebar" />
       </div>
       
       {/* Chat container */}

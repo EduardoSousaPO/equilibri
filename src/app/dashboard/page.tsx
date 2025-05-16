@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Toast } from '@/components/ui/toast';
 import { generateMonthlyReport, PdfReport } from '@/utils/pdf';
 import { MoodEntry, Highlight, ChatMessage } from '@/utils/pdf';
+import { Timeline, TimelineItem } from '@/components/timeline/timeline';
+import { fetchTimelineData } from '@/lib/timeline';
 
 // Componentes mock (a serem substituídos pelos reais)
 const MoodChart = ({ moodData }: { moodData: any[] }) => (
@@ -134,6 +136,7 @@ export default function Dashboard() {
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [reports, setReports] = useState<PdfReport[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
 
   useEffect(() => {
     async function fetchUserData() {
@@ -161,6 +164,10 @@ export default function Dashboard() {
         
         // Gerar dados simulados para os componentes
         await fetchDashboardData(user.id);
+        
+        // Buscar dados da linha do tempo
+        const timeline = await fetchTimelineData(user.id);
+        setTimelineItems(timeline);
         
       } catch (err) {
         console.error('Erro ao carregar dados:', err);
@@ -379,6 +386,10 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <MoodChart moodData={moodData} />
         <Highlights highlights={highlights} />
+      </div>
+      
+      <div className="mb-6">
+        <Timeline items={timelineItems} />
       </div>
       
       <div className="mb-6">

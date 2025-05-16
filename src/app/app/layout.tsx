@@ -79,6 +79,11 @@ export default function AppLayout({
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     )},
+    { label: 'Agendar Sessão', path: '/agenda', icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+    ), visibleForPlans: ['clinical'] },
     { label: 'Relatórios', path: '/app/reports', icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -107,7 +112,9 @@ export default function AppLayout({
         <nav className="flex-1 pt-2 pb-8 overflow-y-auto px-4">
           <div className="divider mb-4 opacity-60"></div>
           <ul className="space-y-1">
-            {navItems.map((item) => (
+            {navItems
+              .filter(item => !item.visibleForPlans || !profile?.plan || item.visibleForPlans.includes(profile.plan))
+              .map((item) => (
               <li key={item.path}>
                 <Link
                   href={item.path}
@@ -123,6 +130,9 @@ export default function AppLayout({
                   {item.label}
                   {item.label === 'Chat com Lari' && (
                     <span className="ml-auto px-2 py-0.5 text-xs rounded-md bg-brand/20 text-brand">Novo</span>
+                  )}
+                  {item.label === 'Agendar Sessão' && profile?.plan === 'clinical' && (
+                    <span className="ml-auto px-2 py-0.5 text-xs rounded-md bg-primary/20 text-primary">Premium</span>
                   )}
                 </Link>
               </li>
@@ -198,7 +208,9 @@ export default function AppLayout({
               
               <nav>
                 <ul className="space-y-1">
-                  {navItems.map((item) => (
+                  {navItems
+                    .filter(item => !item.visibleForPlans || !profile?.plan || item.visibleForPlans.includes(profile.plan))
+                    .map((item) => (
                     <li key={item.path}>
                       <Link
                         href={item.path}
@@ -215,6 +227,9 @@ export default function AppLayout({
                         {item.label}
                         {item.label === 'Chat com Lari' && (
                           <span className="ml-auto px-2 py-0.5 text-xs rounded-md bg-brand/20 text-brand">Novo</span>
+                        )}
+                        {item.label === 'Agendar Sessão' && profile?.plan === 'clinical' && (
+                          <span className="ml-auto px-2 py-0.5 text-xs rounded-md bg-primary/20 text-primary">Premium</span>
                         )}
                       </Link>
                     </li>
