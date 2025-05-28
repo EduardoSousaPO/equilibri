@@ -1,0 +1,4 @@
+Este arquivo é apenas para forçar uma nova implantação na Vercel.
+Data: 2025-05-07
+Timestamp: 19:45:00
+Build corrigido: removidas flags não suportadas do script de build. 

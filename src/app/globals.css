@@ -1,0 +1,206 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --radius: 0.625rem;
+  --background: #F9F6F0;
+  --foreground: #1D3C34;
+  --card: #FFFFFF;
+  --card-foreground: #1D3C34;
+  --popover: #FFFFFF;
+  --popover-foreground: #1D3C34;
+  --primary: #1D3C34;
+  --primary-light: #2A584C;
+  --primary-foreground: #F9F6F0;
+  --secondary: #F0E6D2;
+  --secondary-foreground: #1D3C34;
+  --muted: #F4F4F5;
+  --muted-foreground: #71717A;
+  --accent: #9C8A5A;
+  --accent-foreground: #1D3C34;
+  --destructive: #EF4444;
+  --border: #E4E4E7;
+  --input: #E4E4E7;
+  --ring: #9C8A5A;
+  --cream-50: #F0E6D2;
+  --cream-100: #E6D8BC;
+  --forest-900: #1D3C34;
+  --forest-800: #2A584C;
+  --gold-500: #9C8A5A;
+  --gold-400: #B3A27A;
+  --metallic-gold: linear-gradient(135deg, #C9B37C 0%, #F1E0AC 50%, #C9B37C 100%);
+  --metallic-silver: linear-gradient(135deg, #C0C0C0 0%, #E8E8E8 50%, #C0C0C0 100%);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+.dark {
+  --background: #0F172A;
+  --foreground: #F0E6D2;
+  --card: #1E293B;
+  --card-foreground: #F0E6D2;
+  --popover: #1E293B;
+  --popover-foreground: #F0E6D2;
+  --primary: #2A584C;
+  --primary-light: #3A7868;
+  --primary-foreground: #F0E6D2;
+  --secondary: #1D3C34;
+  --secondary-foreground: #F0E6D2;
+  --muted: #1E293B;
+  --muted-foreground: #94A3B8;
+  --accent: #9C8A5A;
+  --accent-foreground: #F0E6D2;
+  --destructive: #7F1D1D;
+  --border: #1E293B;
+  --input: #1E293B;
+  --ring: #9C8A5A;
+  --cream-50: #1E293B;
+  --cream-100: #334155;
+  --forest-900: #2A584C;
+  --forest-800: #3A7868;
+  --gold-500: #9C8A5A;
+  --gold-400: #B3A27A;
+  --metallic-gold: linear-gradient(135deg, #A69659 0%, #D4C178 50%, #A69659 100%);
+  --metallic-silver: linear-gradient(135deg, #7D7D7D 0%, #A5A5A5 50%, #7D7D7D 100%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif font-bold text-forest-900;
+  }
+}
+
+@font-face {
+  font-family: 'Georgia';
+  src: local('Georgia'), local('Georgia-Regular');
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Georgia';
+  src: local('Georgia Bold'), local('Georgia-Bold');
+  font-style: normal;
+  font-weight: bold;
+  font-display: swap;
+}
+
+.font-georgia {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.font-serif {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.bg-cream-50 {
+  background-color: var(--cream-50);
+}
+
+.text-forest-900 {
+  color: var(--forest-900);
+}
+
+.bg-forest-900 {
+  background-color: var(--forest-900);
+}
+
+.text-gold-500 {
+  color: var(--gold-500);
+}
+
+.bg-gold-500 {
+  background-color: var(--gold-500);
+}
+
+.border-gold-500 {
+  border-color: var(--gold-500);
+}
+
+.bg-metallic-gold {
+  background: var(--metallic-gold);
+}
+
+.bg-metallic-silver {
+  background: var(--metallic-silver);
+}
+
+.text-shadow {
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logo-shadow {
+  filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.2));
+}
+
+/* Efeito metalizado para botões */
+.btn-metallic {
+  background: var(--metallic-gold);
+  background-size: 200% 200%;
+  animation: shimmer 3s linear infinite;
+  border-radius: var(--radius);
+  border: 1px solid rgba(156, 138, 90, 0.3);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  color: var(--forest-900);
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.btn-metallic:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Efeito para cards especiais */
+.card-premium {
+  background: #FFFFFF;
+  border: 1px solid rgba(156, 138, 90, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-premium::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  height: 5px;
+  background: var(--metallic-gold);
+  background-size: 200% 200%;
+  animation: shimmer 3s linear infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 200% 200%;
+  }
+}
