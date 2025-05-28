@@ -1,7 +1,7 @@
 import { Database } from './supabase'
 
 // Tipos de enumeração
-export type EmotionType = 'happy' | 'sad' | 'angry' | 'anxious' | 'calm' | 'neutral';
+export type EmotionType = 'happy' | 'calm' | 'neutral' | 'sad' | 'anxious' | 'angry';
 export type PlanType = 'free' | 'pro' | 'clinical';
 export type MessageRole = 'user' | 'assistant' | 'system';
 export type SlotStatus = 'free' | 'booked';
@@ -37,12 +37,11 @@ export interface UserSettingsUpdate {
 // Definições para check-ins emocionais
 export interface EmotionCheckin {
   id: string;
-  created_at: string;
   user_id: string;
   emotion: EmotionType;
   intensity: number;
   note: string | null;
-  triggers: string[] | null;
+  created_at: string;
 }
 
 export interface EmotionCheckinInsert {
@@ -101,4 +100,39 @@ export interface SlotInsert {
   start_utc: string;
   end_utc: string;
   status?: SlotStatus;
+}
+
+export interface InteractionAnalysis {
+  id: string;
+  user_id: string;
+  message_id: string;
+  cognitive_automatic_thoughts: string[];
+  cognitive_distortions: string[];
+  cognitive_core_beliefs: string[];
+  values_areas: string[];
+  values_conflicts: string[];
+  values_purpose_crisis: boolean;
+  emotional_intensity: number;
+  emotional_coping_strategies: string[];
+  emotional_triggers: string[];
+  behavioral_avoidance: string[];
+  behavioral_functional: string[];
+  behavioral_dysfunctional: string[];
+  behavioral_context: string[];
+  engagement_insight: number;
+  engagement_motivation: number;
+  engagement_interventions: string[];
+  created_at: string;
+}
+
+export interface InteractionAnalysisSummary {
+  user_id: string;
+  total_interactions: number;
+  avg_emotional_intensity: number;
+  avg_insight_level: number;
+  avg_motivation: number;
+  purpose_crisis_count: number;
+  all_distortions: string[];
+  all_triggers: string[];
+  all_valued_areas: string[];
 }

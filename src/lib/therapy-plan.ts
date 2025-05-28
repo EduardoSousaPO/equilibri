@@ -1,10 +1,24 @@
 import { createBrowserClient } from '@supabase/ssr';
+import OpenAI from 'openai';
+
+// Constante para o modelo OpenAI
+const MODEL = 'gpt-4-turbo-preview';
 
 // Cliente Supabase
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
+
+// Função para criar cliente OpenAI
+function createOpenAIClient() {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY não está definida');
+  }
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+  });
+}
 
 // Tipos básicos
 export interface TherapyPlan {
@@ -29,6 +43,47 @@ export interface TherapyTask {
   estimated_minutes: number;
   completed?: boolean;
 }
+
+// Tipos para análise multidimensional
+export type CognitivePattern = {
+  automaticThoughts: string[];
+  cognitiveDistortions: string[];
+  coreBeliefs: string[];
+};
+
+export type ValuesPurpose = {
+  valuedAreas: string[];
+  valueConflicts: string[];
+  purposeCrisis: boolean;
+};
+
+export type EmotionalRegulation = {
+  emotionalIntensity: number;
+  copingStrategies: string[];
+  triggers: string[];
+};
+
+export type BehavioralContext = {
+  avoidancePatterns: string[];
+  functionalBehaviors: string[];
+  dysfunctionalBehaviors: string[];
+  contextualFactors: string[];
+};
+
+export type EngagementReadiness = {
+  insightLevel: number;
+  changeMotivation: number;
+  preferredInterventions: string[];
+};
+
+export type InteractionAnalysis = {
+  cognitive: CognitivePattern;
+  values: ValuesPurpose;
+  emotional: EmotionalRegulation;
+  behavioral: BehavioralContext;
+  engagement: EngagementReadiness;
+  timestamp: Date;
+};
 
 // Função principal para buscar plano ativo
 export async function getUserActivePlan(userId: string): Promise<TherapyPlan | null> {
@@ -182,4 +237,226 @@ export async function getUserBadges(userId: string): Promise<any[]> {
     
   if (error) throw error;
   return data || [];
+}
+
+// Função para analisar uma única interação
+export async function analyzeInteraction(
+  message: string,
+  emotionCheckins: any[] = [],
+  previousAnalyses: InteractionAnalysis[] = []
+): Promise<InteractionAnalysis> {
+  const client = createOpenAIClient();
+  
+  const prompt = `Analise a seguinte interação do usuário em um contexto terapêutico, considerando as principais abordagens (TCC, ACT, DBT e Logoterapia):
+
+1. Padrões Cognitivos (TCC):
+- Identifique pensamentos automáticos negativos e sua intensidade (1-5)
+- Aponte distorções cognitivas específicas e exemplos
+- Sugira crenças centrais subjacentes e temas recorrentes
+- Identifique evidências que confirmam/desafiam os pensamentos
+
+2. Valores e Propósito (ACT/Logoterapia):
+- Identifique áreas de vida valorizadas mencionadas
+- Detecte ações alinhadas ou em conflito com valores
+- Avalie sinais de crise de sentido/propósito
+- Identifique oportunidades de autotranscendência
+- Note temas existenciais presentes (liberdade, responsabilidade, sentido)
+
+3. Regulação Emocional (DBT):
+- Avalie intensidade emocional (1-5)
+- Identifique emoções primárias e secundárias
+- Liste gatilhos emocionais específicos
+- Avalie habilidades de mindfulness presentes/ausentes
+- Identifique estratégias de enfrentamento funcionais/disfuncionais
+- Note sinais de desregulação que precisam de TIPP
+
+4. Comportamentos e Contexto:
+- Identifique padrões de evitação experiencial
+- Liste comportamentos funcionais que podem ser reforçados
+- Detecte comportamentos disfuncionais que precisam de mudança
+- Aponte fatores contextuais que mantêm padrões
+- Identifique recursos e suporte social disponível
+
+5. Engajamento e Prontidão:
+- Avalie nível de insight (1-5)
+- Avalie motivação para mudança (1-5)
+- Identifique barreiras para mudança
+- Note preferências por tipo de intervenção
+- Avalie aliança terapêutica e resistências
+
+6. Avaliação de Risco:
+- Identifique sinais de ideação suicida
+- Note comportamentos autolesivos
+- Avalie urgência de encaminhamento
+- Detecte fatores de proteção presentes
+
+Mensagem do usuário: "${message}"
+
+Responda em formato JSON seguindo exatamente esta estrutura:
+{
+  "cognitive": {
+    "automaticThoughts": [],
+    "cognitiveDistortions": [],
+    "coreBeliefs": [],
+    "thoughtIntensity": 0,
+    "evidences": {
+      "supporting": [],
+      "challenging": []
+    }
+  },
+  "values": {
+    "valuedAreas": [],
+    "valueConflicts": [],
+    "purposeCrisis": false,
+    "existentialThemes": [],
+    "transcendenceOpportunities": []
+  },
+  "emotional": {
+    "emotionalIntensity": 0,
+    "primaryEmotions": [],
+    "secondaryEmotions": [],
+    "copingStrategies": {
+      "functional": [],
+      "dysfunctional": []
+    },
+    "triggers": [],
+    "mindfulnessSkills": {
+      "present": [],
+      "needed": []
+    },
+    "needsTIPP": false
+  },
+  "behavioral": {
+    "avoidancePatterns": [],
+    "functionalBehaviors": [],
+    "dysfunctionalBehaviors": [],
+    "contextualFactors": [],
+    "socialSupport": []
+  },
+  "engagement": {
+    "insightLevel": 0,
+    "changeMotivation": 0,
+    "barriers": [],
+    "preferredInterventions": [],
+    "therapeuticAlliance": {
+      "strength": 0,
+      "resistances": []
+    }
+  },
+  "risk": {
+    "suicidalIdeation": false,
+    "selfHarmBehaviors": false,
+    "urgencyLevel": 0,
+    "protectiveFactors": []
+  }
+}`;
+
+  try {
+    const response = await client.chat.completions.create({
+      model: MODEL,
+      messages: [
+        { role: 'system', content: 'Você é um terapeuta especializado em análise multidimensional de interações terapêuticas.' },
+        { role: 'user', content: prompt }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+    });
+
+    const analysis = JSON.parse(response.choices[0].message.content || '{}');
+    
+    return {
+      ...analysis,
+      timestamp: new Date()
+    };
+  } catch (error) {
+    console.error('Erro na análise da interação:', error);
+    throw error;
+  }
+}
+
+// Função para analisar padrões em múltiplas interações
+export function analyzeInteractionPatterns(analyses: InteractionAnalysis[]): {
+  predominantDistortions: string[];
+  commonTriggers: string[];
+  valueThemes: string[];
+  behavioralPatterns: string[];
+  recommendedApproach: 'TCC' | 'ACT' | 'DBT' | 'Logoterapia';
+} {
+  // Contadores para análise de frequência
+  const distortions: { [key: string]: number } = {};
+  const triggers: { [key: string]: number } = {};
+  const values: { [key: string]: number } = {};
+  const behaviors: { [key: string]: number } = {};
+  
+  // Acumuladores para médias
+  let totalEmotionalIntensity = 0;
+  let totalInsightLevel = 0;
+  let totalChangeMotivation = 0;
+  let purposeCrisisCount = 0;
+  
+  // Analisar cada interação
+  analyses.forEach(analysis => {
+    // Contabilizar distorções cognitivas
+    analysis.cognitive.cognitiveDistortions.forEach(d => {
+      distortions[d] = (distortions[d] || 0) + 1;
+    });
+    
+    // Contabilizar gatilhos
+    analysis.emotional.triggers.forEach(t => {
+      triggers[t] = (triggers[t] || 0) + 1;
+    });
+    
+    // Contabilizar áreas de valor
+    analysis.values.valuedAreas.forEach(v => {
+      values[v] = (values[v] || 0) + 1;
+    });
+    
+    // Contabilizar comportamentos disfuncionais
+    analysis.behavioral.dysfunctionalBehaviors.forEach(b => {
+      behaviors[b] = (behaviors[b] || 0) + 1;
+    });
+    
+    // Acumular médias
+    totalEmotionalIntensity += analysis.emotional.emotionalIntensity;
+    totalInsightLevel += analysis.engagement.insightLevel;
+    totalChangeMotivation += analysis.engagement.changeMotivation;
+    if (analysis.values.purposeCrisis) purposeCrisisCount++;
+  });
+  
+  // Calcular médias
+  const avgEmotionalIntensity = totalEmotionalIntensity / analyses.length;
+  const avgInsightLevel = totalInsightLevel / analyses.length;
+  const avgChangeMotivation = totalChangeMotivation / analyses.length;
+  const purposeCrisisFrequency = purposeCrisisCount / analyses.length;
+  
+  // Determinar abordagem recomendada
+  let recommendedApproach: 'TCC' | 'ACT' | 'DBT' | 'Logoterapia' = 'TCC';
+  
+  if (avgEmotionalIntensity > 4) {
+    recommendedApproach = 'DBT';
+  } else if (purposeCrisisFrequency > 0.5) {
+    recommendedApproach = 'Logoterapia';
+  } else if (Object.keys(values).length > Object.keys(distortions).length) {
+    recommendedApproach = 'ACT';
+  }
+  
+  return {
+    predominantDistortions: Object.entries(distortions)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3)
+      .map(([d]) => d),
+    commonTriggers: Object.entries(triggers)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3)
+      .map(([t]) => t),
+    valueThemes: Object.entries(values)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3)
+      .map(([v]) => v),
+    behavioralPatterns: Object.entries(behaviors)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3)
+      .map(([b]) => b),
+    recommendedApproach
+  };
 } 

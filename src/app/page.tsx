@@ -4,10 +4,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { EquilibriLogo } from '@/components/ui/logo'
 import { Button } from '@/components/ui/button'
+import { WhatsAppButton } from '@/components/ui/whatsapp-button'
 
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
+      <WhatsAppButton />
       {/* Banner da nova funcionalidade */}
       <div className="bg-brand text-white p-3 text-center">
         <p className="font-medium">
@@ -20,7 +22,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex-shrink-0 flex items-center">
-              <EquilibriLogo className="h-9" textColor="text-background" />
+              <EquilibriLogo className="h-auto" imageSize="md" showText={false} />
             </div>
             <div className="hidden md:ml-6 md:flex md:space-x-8">
               <Link href="#features" className="inline-flex items-center px-1 pt-1 text-sm font-medium text-background hover:text-accent-light transition-colors">
@@ -50,6 +52,9 @@ export default function HomePage() {
         <div className="bg-background-secondary">
           <div className="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8">
             <div className="text-center">
+              <div className="flex justify-center mb-12">
+                <EquilibriLogo className="h-auto" imageSize="xl" showText={false} />
+              </div>
               <h1 className="text-4xl font-georgia font-bold text-primary sm:text-5xl sm:tracking-tight lg:text-6xl">
                 Seu Companheiro Terapêutico<br/>Inteligente
               </h1>
@@ -78,7 +83,9 @@ export default function HomePage() {
                   Conheça Lari, sua terapeuta digital
                 </p>
                 <p className="mt-4 text-lg text-text-primary">
-                  Lari é uma inteligência artificial especializada em apoio terapêutico, desenvolvida com base em terapias cientificamente validadas para oferecer suporte emocional personalizado.
+                  Oi! Sou a Lari, uma companheira digital que une ciência e acolhimento para te ajudar em sua jornada de bem-estar emocional. 
+                  Através de conversas significativas e técnicas comprovadas, posso te auxiliar a lidar melhor com pensamentos, 
+                  emoções e desafios do dia a dia, sempre respeitando seu ritmo e suas necessidades únicas.
                 </p>
                 <ul className="mt-6 space-y-3">
                   <li className="flex items-start">
@@ -184,7 +191,7 @@ export default function HomePage() {
             </div>
 
             <div className="mt-16">
-              <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-2">
                 {/* Feature 1 */}
                 <div className="border border-border rounded-lg p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
                   <div className="w-12 h-12 rounded-md flex items-center justify-center bg-primary-ultra-light text-primary">
@@ -280,57 +287,8 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-4">
-              {/* Passo 1 */}
-              <div className="border border-border rounded-lg p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-10 h-10 rounded-full bg-primary-ultra-light flex items-center justify-center text-primary font-bold mb-4">
-                  1
-                </div>
-                <h3 className="text-lg font-medium text-primary mb-2">Converse com a Lari</h3>
-                <p className="text-base text-text-primary">
-                  Inicie seu dia com um check-in emocional no chat e compartilhe seus pensamentos com a Lari.
-                </p>
-              </div>
-
-              {/* Passo 2 */}
-              <div className="border border-border rounded-lg p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-10 h-10 rounded-full bg-primary-ultra-light flex items-center justify-center text-primary font-bold mb-4">
-                  2
-                </div>
-                <h3 className="text-lg font-medium text-primary mb-2">Receba seu Plano</h3>
-                <p className="text-base text-text-primary">
-                  Após algumas conversas, a Lari cria um plano terapêutico personalizado com tarefas diárias.
-                </p>
-              </div>
-
-              {/* Passo 3 */}
-              <div className="border border-border rounded-lg p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-10 h-10 rounded-full bg-primary-ultra-light flex items-center justify-center text-primary font-bold mb-4">
-                  3
-                </div>
-                <h3 className="text-lg font-medium text-primary mb-2">Acompanhe seu Progresso</h3>
-                <p className="text-base text-text-primary">
-                  Visualize sua jornada emocional no dashboard e identifique padrões para melhorar seu bem-estar.
-                </p>
-              </div>
-
-              {/* Passo 4 */}
-              <div className="border border-border rounded-lg p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-10 h-10 rounded-full bg-primary-ultra-light flex items-center justify-center text-primary font-bold mb-4">
-                  4
-                </div>
-                <h3 className="text-lg font-medium text-primary mb-2">Conecte-se com Profissionais</h3>
-                <p className="text-base text-text-primary">
-                  No plano Premium Clínico, agende sua sessão mensal com psicóloga para aprofundar seu autoconhecimento.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-16">
-              <div className="text-center mb-8">
-                <h3 className="text-xl font-semibold text-primary">Baseado em abordagens terapêuticas comprovadas</h3>
-              </div>
-              <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            <div className="mt-12">
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                 {/* TCC */}
                 <div className="border border-border rounded-lg p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
                   <h3 className="text-lg font-medium text-primary">Terapia Cognitivo-Comportamental (TCC)</h3>
@@ -361,6 +319,17 @@ export default function HomePage() {
                   </p>
                   <p className="mt-4 text-sm text-text-secondary">
                     <strong>Aplicação no Equilibri:</strong> Sugestão de técnicas de autorregulação emocional, estratégias de tolerância ao estresse e práticas de mindfulness adaptadas às necessidades específicas.
+                  </p>
+                </div>
+
+                {/* Logoterapia */}
+                <div className="border border-border rounded-lg p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
+                  <h3 className="text-lg font-medium text-primary">Logoterapia</h3>
+                  <p className="mt-2 text-base text-text-primary">
+                    Abordagem centrada no sentido da vida, que ajuda as pessoas a descobrirem significado em suas experiências e desenvolverem um propósito autêntico.
+                  </p>
+                  <p className="mt-4 text-sm text-text-secondary">
+                    <strong>Aplicação no Equilibri:</strong> Exploração de valores fundamentais, identificação de fontes de sentido, desenvolvimento de projetos significativos e técnicas de autotranscendência para conectar com propósitos maiores.
                   </p>
                 </div>
               </div>
@@ -696,7 +665,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             <div>
-              <EquilibriLogo className="h-6" textColor="text-text-secondary" />
+              <EquilibriLogo className="h-auto" imageSize="sm" showText={false} />
               <p className="mt-2 text-sm text-text-secondary">
                 &copy; {new Date().getFullYear()} Equilibri.IA. Todos os direitos reservados.
               </p>

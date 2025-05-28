@@ -1,58 +1,56 @@
 'use client'
 
-import React, { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 
 export default function PaymentFailurePage() {
   const router = useRouter()
   
-  useEffect(() => {
-    // Registrar erro de pagamento em analytics (implementação futura)
-  }, [])
-  
   return (
-    <div className="max-w-3xl mx-auto py-12 px-4">
-      <div className="bg-background rounded-lg p-8 shadow-sm text-center">
-        <div className="w-20 h-20 bg-error-light rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+    <div className="container mx-auto px-4 py-16">
+      <Card className="max-w-lg mx-auto p-8 text-center">
+        <div className="mb-6">
+          <svg
+            className="w-16 h-16 text-red-500 mx-auto"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </div>
         
-        <h1 className="text-2xl font-bold text-text-primary mb-4">Pagamento não Aprovado</h1>
+        <h1 className="text-2xl font-bold mb-4">
+          Ops! Houve um problema com o pagamento
+        </h1>
         
-        <p className="text-text-secondary mb-6">
-          Infelizmente, houve um problema com o seu pagamento e ele não foi aprovado. Isso pode acontecer por diversos motivos, como problemas com o cartão, saldo insuficiente ou questões de segurança.
+        <p className="text-gray-600 mb-8">
+          Não foi possível processar seu pagamento. Por favor, tente novamente ou entre em contato com o suporte se o problema persistir.
         </p>
-        
-        <div className="bg-background-secondary rounded-lg p-4 mb-6">
-          <h2 className="font-semibold text-text-primary mb-2">O que você pode fazer:</h2>
-          <ul className="text-text-secondary text-left list-disc list-inside space-y-1">
-            <li>Verificar se os dados do cartão estão corretos</li>
-            <li>Tentar outro método de pagamento</li>
-            <li>Verificar se há saldo suficiente</li>
-            <li>Entrar em contato com seu banco para verificar se há restrições</li>
-          </ul>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <button
-            type="button"
+
+        <div className="space-y-4">
+          <Button
+            className="w-full"
             onClick={() => router.push('/app/upgrade')}
-            className="px-6 py-3 bg-primary text-white rounded-md hover:bg-primary-light transition-colors"
           >
             Tentar Novamente
-          </button>
+          </Button>
           
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            className="w-full"
             onClick={() => router.push('/app/dashboard')}
-            className="px-6 py-3 border border-border text-text-secondary rounded-md hover:bg-background-secondary transition-colors"
           >
             Voltar ao Dashboard
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
     </div>
   )
 }

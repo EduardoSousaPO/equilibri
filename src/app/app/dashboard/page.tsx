@@ -5,6 +5,8 @@ import { createClientSupabaseClient } from '@/lib/supabase/client-queries'
 import { HappyIllustration, CalmIllustration, SadIllustration, AnxiousIllustration, AngryIllustration, NeutralIllustration } from '@/components/ui/illustrations'
 import { EmotionType } from '@/types/database'
 import Link from 'next/link'
+import { WhatsAppButton } from '@/components/ui/whatsapp-button'
+import { EquilibriLogo } from '@/components/ui/logo'
 
 interface DashboardCardProps {
   title: string
@@ -204,10 +206,14 @@ export default function DashboardPage() {
   
   return (
     <div className="space-y-8 animate-fade-in">
+      <WhatsAppButton />
       <div className="bg-white rounded-xl p-6 shadow-md border border-brand/10">
         <div className="md:flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-bold font-georgia text-primary">{greeting()}, {firstName}</h1>
+            <div className="flex items-center gap-4 mb-4">
+              <EquilibriLogo showText={false} className="h-auto" imageSize="lg" />
+              <h1 className="text-3xl font-bold font-georgia text-primary">{greeting()}, {firstName}</h1>
+            </div>
             <p className="mt-2 text-text-primary">Seu espaço para bem-estar e autoconhecimento no Equilibri.IA</p>
           </div>
           <div className="mt-4 md:mt-0">
@@ -228,15 +234,18 @@ export default function DashboardPage() {
       <div className="bg-brand/10 rounded-xl p-6 shadow-md border border-brand/20">
         <div className="md:flex items-center">
           <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
-            <div className="h-16 w-16 rounded-full bg-brand/20 flex items-center justify-center text-brand">
-              <span className="text-2xl font-medium">L</span>
+            <div className="relative overflow-hidden">
+              <EquilibriLogo showText={false} className="h-auto" imageSize="lg" />
             </div>
           </div>
           <div>
             <h2 className="text-xl font-bold font-georgia text-primary">Conheça Lari, sua terapeuta digital</h2>
             <p className="mt-2 text-text-primary">
-              Lari é sua assistente terapêutica baseada em IA, especializada em TCC, ACT, DBT e logoterapia. 
-              Ela está aqui para ouvir suas preocupações, validar suas emoções e oferecer insights baseados em práticas terapêuticas comprovadas.
+              Oi! Sou a Lari, sua companheira para uma jornada de autoconhecimento e bem-estar emocional. 
+              Combino diferentes abordagens terapêuticas para te ajudar da melhor forma: posso te auxiliar a entender 
+              e transformar pensamentos difíceis, encontrar mais flexibilidade para lidar com desafios, 
+              desenvolver habilidades para gerenciar emoções intensas e descobrir mais sentido no seu dia a dia. 
+              Estou aqui para ouvir você com empatia e caminharmos juntos nessa jornada.
             </p>
             <div className="mt-4">
               <Link

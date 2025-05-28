@@ -212,10 +212,10 @@ export default function SettingsPage() {
               <div>
                 <h3 className="font-medium text-teal-900">Plano atual</h3>
                 <p className="text-sm text-teal-800 opacity-70">
-                  {profile?.plan === 'premium' ? 'Plano Premium' : 'Plano Gratuito'}
+                  {profile?.plan === 'clinical' ? 'Plano Premium Clínico' : profile?.plan === 'pro' ? 'Plano Premium' : 'Plano Gratuito'}
                 </p>
               </div>
-              {profile?.plan !== 'premium' && (
+              {profile?.plan !== 'clinical' && (
                 <Link
                   href="/app/upgrade"
                   className="inline-flex items-center px-3 py-1.5 rounded-lg font-medium text-teal-900 bg-gold-500 hover:bg-gold-400 transition-colors duration-300"

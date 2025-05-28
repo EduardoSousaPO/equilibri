@@ -2,24 +2,70 @@
 
 import React, { useState, useEffect } from 'react'
 import { createClientSupabaseClient } from '@/lib/supabase/client-queries'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { useRouter } from 'next/navigation'
+import { Toaster } from '@/components/ui/toaster'
+import { useToast } from '@/components/ui/use-toast'
+
+const plans = [
+  {
+    id: 'premium_monthly',
+    name: 'Premium Mensal',
+    price: 'R$ 39,90',
+    features: [
+      'Chat ilimitado com Lari',
+      'Check-ins emocionais ilimitados',
+      'Plano terapêutico avançado',
+      'Análise avançada de padrões emocionais',
+      'Exportação de relatórios em PDF',
+      'Compartilhamento com terapeuta'
+    ]
+  },
+  {
+    id: 'premium_annual',
+    name: 'Premium Anual',
+    price: 'R$ 399,90',
+    features: [
+      'Todos os benefícios do plano mensal',
+      'Economia de 2 meses',
+      'Acesso antecipado a novos recursos',
+      'Sessão de orientação personalizada'
+    ]
+  },
+  {
+    id: 'clinical_monthly',
+    name: 'Premium Clínico',
+    price: 'R$ 179,00',
+    features: [
+      'Tudo do plano Premium',
+      '1 sessão mensal com psicóloga',
+      'Videochamada de 60 minutos',
+      'Agendamento online fácil',
+      'Continuidade terapêutica',
+      'Acesso à agenda exclusiva'
+    ]
+  }
+]
 
 export default function UpgradePage() {
+  const router = useRouter()
+  const { toast } = useToast()
   const [profile, setProfile] = useState<any>(null)
-  const [loading, setLoading] = useState<boolean>(true)
+  const [loading, setLoading] = useState<string | null>(null)
   const [isCreatingPayment, setIsCreatingPayment] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
-  const [selectedPlan, setSelectedPlan] = useState<string>('monthly')
   
   useEffect(() => {
     const fetchProfile = async () => {
-      setLoading(true)
+      setLoading('profile')
       
       try {
         const supabase = createClientSupabaseClient()
         const { data: { user } } = await supabase.auth.getUser()
         
         if (!user) {
-          setLoading(false)
+          setLoading(null)
           return
         }
         
@@ -36,263 +82,96 @@ export default function UpgradePage() {
         console.error('Error fetching profile:', error)
         setError('Erro ao buscar informações do perfil. Por favor, tente novamente.')
       } finally {
-        setLoading(false)
+        setLoading(null)
       }
     }
     
     fetchProfile()
   }, [])
   
-  const handleUpgrade = async () => {
+  const handleUpgrade = async (planId: string) => {
     setIsCreatingPayment(true)
     setError(null)
     
     try {
-      // Configurações para a chamada da API
-      const requestConfig = {
-        id: selectedPlan === 'monthly' ? 'premium_monthly' : 'premium_annual',
-        title: 'Assinatura Premium Equilibri - 1 mês',
-        price: selectedPlan === 'monthly' ? 39.90 : 399.90,
-        currency: 'BRL',
-        description: 'Acesso a todos os recursos premium do Equilibri'
-      };
+      setLoading(planId)
       
       const response = await fetch('/api/payments/create-preference', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          preference_data: requestConfig
-        }),
+          preference_data: {
+            id: planId
+          }
+        })
       })
       
       const data = await response.json()
       
       if (!response.ok) {
-        throw new Error(data.error || 'Erro ao criar preferência de pagamento')
+        throw new Error(data.error || 'Erro ao processar pagamento')
       }
       
-      // Redirecionar para a página de pagamento do Mercado Pago
+      // Redirecionar para página de pagamento do Mercado Pago
       window.location.href = data.init_point
-    } catch (error) {
-      console.error('Error creating payment preference:', error)
-      setError('Ocorreu um erro ao processar o pagamento. Por favor, tente novamente.')
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao iniciar pagamento",
+        description: error.message
+      })
     } finally {
       setIsCreatingPayment(false)
+      setLoading(null)
     }
   }
   
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-text-primary">Upgrade para Premium</h1>
-      </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-center mb-8">
+        Escolha o plano ideal para você
+      </h1>
       
-      {error && (
-        <div className="mb-4 p-3 bg-error-light text-error rounded-md">
-          {error}
-        </div>
-      )}
-      
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-background rounded-lg p-6 shadow-sm">
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-semibold text-text-primary">Plano Gratuito</h2>
-              <p className="text-text-secondary mt-1">Seu plano atual</p>
-              <p className="text-3xl font-bold text-text-primary mt-4">R$ 0</p>
-              <p className="text-text-secondary">para sempre</p>
-            </div>
+      <div className="grid md:grid-cols-3 gap-8">
+        {plans.map((plan) => (
+          <Card key={plan.id} className="p-6">
+            <h2 className="text-2xl font-bold mb-4">{plan.name}</h2>
+            <p className="text-3xl font-bold mb-6">{plan.price}</p>
             
-            <ul className="space-y-3 mb-6">
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-success mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-text-primary">Até 50 entradas de diário por mês</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-success mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-text-primary">Até 2 entradas de áudio por mês</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-success mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-text-primary">Até 4 relatórios semanais</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-success mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-text-primary">Check-ins emocionais ilimitados</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-success mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-text-primary">Acesso a técnicas terapêuticas</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-error mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                <span className="text-text-secondary">Sem análise avançada de padrões</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-error mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                <span className="text-text-secondary">Sem exportação de dados</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-error mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                <span className="text-text-secondary">Sem compartilhamento com terapeuta</span>
-              </li>
-            </ul>
-            
-            <button
-              type="button"
-              disabled
-              className="w-full px-4 py-3 bg-background-secondary text-text-secondary rounded-md cursor-not-allowed"
-            >
-              Plano Atual
-            </button>
-          </div>
-          
-          <div className="bg-background rounded-lg p-6 shadow-sm border-2 border-primary relative">
-            <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-2">
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary text-white">
-                Recomendado
-              </span>
-            </div>
-            
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-semibold text-text-primary">Plano Premium</h2>
-              <p className="text-text-secondary mt-1">Desbloqueie todo o potencial</p>
-              <p className="text-3xl font-bold text-text-primary mt-4">R$ 39,90</p>
-              <p className="text-text-secondary">por mês</p>
-            </div>
-            
-            <ul className="space-y-3 mb-6">
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-success mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-text-primary">Entradas de diário ilimitadas</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-success mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-text-primary">Entradas de áudio ilimitadas</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-success mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-text-primary">Relatórios semanais ilimitados</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-success mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-text-primary">Check-ins emocionais ilimitados</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-success mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-text-primary">Acesso a todas as técnicas terapêuticas</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-success mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-text-primary">Análise avançada de padrões emocionais</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-success mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-text-primary">Exportação de dados em PDF</span>
-              </li>
-              <li className="flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-success mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-text-primary">Compartilhamento com terapeuta</span>
-              </li>
-            </ul>
-            
-            <button
-              type="button"
-              onClick={handleUpgrade}
-              disabled={isCreatingPayment || profile?.plan === 'premium'}
-              className={`w-full px-4 py-3 rounded-md ${
-                profile?.plan === 'premium'
-                  ? 'bg-success text-white cursor-not-allowed'
-                  : 'bg-primary text-white hover:bg-primary-light transition-colors'
-              }`}
-            >
-              {isCreatingPayment ? (
-                <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <ul className="mb-6 space-y-2">
+              {plan.features.map((feature, index) => (
+                <li key={index} className="flex items-center">
+                  <svg
+                    className="w-5 h-5 text-green-500 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
-                  Processando...
-                </span>
-              ) : profile?.plan === 'premium' ? (
-                'Assinatura Ativa'
-              ) : (
-                'Fazer Upgrade Agora'
-              )}
-            </button>
+                  {feature}
+                </li>
+              ))}
+            </ul>
             
-            {profile?.plan === 'premium' && (
-              <div className="mt-4 text-center text-text-secondary text-sm">
-                Sua assinatura está ativa até {new Date(profile.subscription_end_date).toLocaleDateString('pt-BR')}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-      
-      <div className="mt-8 bg-background rounded-lg p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-text-primary mb-4">Perguntas Frequentes</h2>
-        
-        <div className="space-y-4">
-          <div>
-            <h3 className="font-medium text-text-primary">Como funciona a cobrança?</h3>
-            <p className="text-text-secondary mt-1">A assinatura é mensal e será renovada automaticamente. Você pode cancelar a qualquer momento.</p>
-          </div>
-          
-          <div>
-            <h3 className="font-medium text-text-primary">Posso cancelar minha assinatura?</h3>
-            <p className="text-text-secondary mt-1">Sim, você pode cancelar sua assinatura a qualquer momento. Após o cancelamento, você continuará tendo acesso Premium até o final do período pago.</p>
-          </div>
-          
-          <div>
-            <h3 className="font-medium text-text-primary">Quais formas de pagamento são aceitas?</h3>
-            <p className="text-text-secondary mt-1">Aceitamos cartões de crédito, débito e Pix através do Mercado Pago.</p>
-          </div>
-          
-          <div>
-            <h3 className="font-medium text-text-primary">O que acontece com meus dados se eu cancelar?</h3>
-            <p className="text-text-secondary mt-1">Seus dados permanecem seguros em sua conta. Se você voltar para o plano gratuito, terá acesso limitado a novos recursos, mas seus dados existentes continuarão disponíveis.</p>
-          </div>
-        </div>
+            <Button
+              className="w-full"
+              onClick={() => handleUpgrade(plan.id)}
+              disabled={loading === plan.id}
+            >
+              {loading === plan.id ? 'Processando...' : 'Assinar Agora'}
+            </Button>
+          </Card>
+        ))}
       </div>
+      <Toaster />
     </div>
   )
 }

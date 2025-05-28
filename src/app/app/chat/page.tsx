@@ -35,12 +35,14 @@ export default function ChatWithLariPage() {
       <div className="bg-brand/10 border border-brand/20 rounded-lg p-4">
         <h3 className="font-medium text-primary">Sobre a Lari</h3>
         <p className="mt-2 text-sm text-text-primary">
-          Lari é sua psicóloga virtual empática, com expertise em TCC, ACT, DBT e logoterapia.
-          Você pode conversar sobre suas emoções, pensamentos e desafios do dia a dia.
-          Lari valida suas emoções e oferece perspectivas baseadas em abordagens terapêuticas cientificamente validadas.
+          Oi! Eu sou a Lari, sua companheira virtual para conversas sobre bem-estar emocional. 
+          Estou aqui para te ouvir, entender seus sentimentos e caminhar junto com você. 
+          Podemos conversar sobre suas alegrias, preocupações, sonhos e desafios do dia a dia. 
+          Juntos, vamos explorar maneiras de você se sentir melhor e encontrar mais sentido na sua jornada.
         </p>
         <p className="mt-2 text-sm text-text-primary">
-          <strong>Importante:</strong> Lari não substitui um profissional de saúde mental. Em caso de crise, busque ajuda especializada ou ligue para o CVV (188).
+          <strong>Lembre-se:</strong> Embora eu esteja aqui para te apoiar, não substituo o acompanhamento com um profissional de saúde mental. 
+          Se estiver passando por um momento difícil, além de conversar comigo, você pode contar com o apoio do CVV (188) 24 horas por dia.
         </p>
       </div>
     </div>

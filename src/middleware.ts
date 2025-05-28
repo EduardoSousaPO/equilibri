@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server'
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import type { NextRequest } from 'next/server'
 
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'seu-email@exemplo.com'
+
 // Este middleware não faz nada, apenas passa todas as requisições adiante
 export async function middleware(req: NextRequest) {
   // Criar cliente Supabase para o middleware
@@ -40,9 +42,16 @@ export async function middleware(req: NextRequest) {
                         pathname.includes('.jpg') ||
                         pathname.includes('.png')
   
+  // Rotas que requerem autenticação
+  const authRoutes = ['/app', '/agenda', '/dashboard', '/api/agenda']
+  const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
+
+  // Rota administrativa
+  const isAdminRoute = pathname.startsWith('/admin')
+
   // Redirecionar usuários não autenticados para login
   // Exceto em rotas públicas
-  if (!session && !isPublicRoute) {
+  if (!session && !isPublicRoute && isAuthRoute) {
     console.log("🔒 [Middleware] Usuário não autenticado, redirecionando para login")
     url.pathname = '/login'
     return NextResponse.redirect(url)
@@ -55,7 +64,46 @@ export async function middleware(req: NextRequest) {
     url.pathname = '/app/dashboard'
     return NextResponse.redirect(url)
   }
-  
+
+  // Verificar acesso à área administrativa
+  if (isAdminRoute) {
+    if (!session) {
+      console.log('⛔ [Middleware] Acesso negado à área administrativa')
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+
+    // Verificar se é o email do administrador
+    if (session.user.email !== ADMIN_EMAIL) {
+      console.log('⛔ [Middleware] Acesso negado à área administrativa')
+      url.pathname = '/app/dashboard'
+      return NextResponse.redirect(url)
+    }
+  }
+
+  // Verificar acesso à área de psicólogos
+  if (pathname.startsWith('/therapist')) {
+    if (!session) {
+      console.log('⛔ [Middleware] Acesso negado à área de psicólogos')
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+
+    // Buscar perfil do usuário
+    const { data: profile } = await supabase
+      .from('therapists')
+      .select('status')
+      .eq('user_id', session.user.id)
+      .single()
+
+    // Se não for um psicólogo ativo, redirecionar
+    if (!profile || profile.status !== 'active') {
+      console.log('⛔ [Middleware] Acesso negado à área de psicólogos')
+      url.pathname = '/app/dashboard'
+      return NextResponse.redirect(url)
+    }
+  }
+
   return res
 }
 
@@ -67,7 +115,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - public (public files)
      */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico|public).*)',
   ],
 }

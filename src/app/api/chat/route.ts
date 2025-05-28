@@ -1,199 +1,208 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server-queries';
+import { createRouteClient } from '@/lib/supabase/server';
+import { 
+  analyzeInteraction, 
+  analyzeInteractionPatterns,
+  type InteractionAnalysis 
+} from '@/lib/therapy-plan';
+
+type PatternAnalysis = {
+  predominantDistortions: string[];
+  commonTriggers: string[];
+  valueThemes: string[];
+  behavioralPatterns: string[];
+  recommendedApproach: 'TCC' | 'ACT' | 'DBT' | 'Logoterapia';
+};
 
 export async function POST(req: Request) {
   try {
     console.log('🤖 [CHAT] Iniciando processamento de mensagem...');
     
-    // Criar cliente Supabase
-    const supabase = await createServerSupabaseClient();
+    const supabase = await createRouteClient();
     
-    // OBRIGATÓRIO: Verificar se o usuário está autenticado
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    
-    if (sessionError) {
-      console.error('❌ [CHAT] Erro ao verificar sessão:', sessionError);
+    // Verificar autenticação
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
       return NextResponse.json(
-        { error: 'Erro de autenticação. Tente fazer login novamente.' },
-        { status: 401 }
-      );
-    }
-    
-    if (!session || !session.user) {
-      console.error('❌ [CHAT] Usuário não autenticado');
-      return NextResponse.json(
-        { error: 'Usuário não autenticado. Faça login para continuar.' },
+        { error: 'Não autorizado' },
         { status: 401 }
       );
     }
     
     const userId = session.user.id;
-    console.log('✅ [CHAT] Usuário autenticado:', userId);
+    const { message, history } = await req.json();
     
-    const body = await req.json();
-    const { message, history } = body;
-    
-    // Validações básicas
-    if (!message) {
-      return NextResponse.json(
-        { error: 'Mensagem é obrigatória' },
-        { status: 400 }
-      );
-    }
-    
-    // Verificar se o usuário existe no banco de dados
-    const { data: userProfile, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, name, plan, msg_count')
-      .eq('id', userId)
-      .single();
-    
-    if (profileError || !userProfile) {
-      console.error('❌ [CHAT] Perfil não encontrado:', profileError);
-      return NextResponse.json(
-        { error: 'Perfil de usuário não encontrado. Faça login novamente.' },
-        { status: 404 }
-      );
-    }
-    
-    // Verificar plano e limites
-    const userPlan = userProfile.plan || 'free';
-    const subscriptionStatus = 'active';
-    const messageCount = userProfile.msg_count || 0;
-    
-    console.log('📋 [CHAT] Plano do usuário:', { 
-      userPlan, 
-      subscriptionStatus, 
-      messageCount 
-    });
-    
-    // Verificar se a assinatura está ativa (apenas para planos pagos)
-    if (userPlan !== 'free' && subscriptionStatus !== 'active') {
-      return NextResponse.json({ 
-        error: `Sua assinatura ${userPlan} está ${subscriptionStatus}. Reative sua assinatura para continuar usando o chat.` 
-      }, { status: 403 });
-    }
-    
-    // Verificar limite de mensagens para plano gratuito
-    if (userPlan === 'free' && messageCount >= 30) {
-      return NextResponse.json({ 
-        error: 'Você atingiu o limite mensal de 30 mensagens do plano gratuito. Faça upgrade para o plano Premium para mensagens ilimitadas.',
-        limitReached: true,
-        plan: 'free',
-        messageCount: messageCount
-      }, { status: 403 });
-    }
-    
-    // Verificar variáveis de ambiente críticas
-    if (!process.env.OPENAI_API_KEY) {
-      console.error('❌ [CHAT] OPENAI_API_KEY não configurada');
-      return NextResponse.json(
-        { error: 'Serviço temporariamente indisponível. Tente novamente em alguns minutos.' },
-        { status: 503 }
-      );
-    }
-    
-    // Salvar mensagem do usuário
-    await supabase
+    // Criar entrada de mensagem no chat
+    const { data: messageData, error: messageError } = await supabase
       .from('chat_messages')
       .insert({
         user_id: userId,
-        role: 'user',
         content: message,
-        created_at: new Date().toISOString()
-      });
+        role: 'user'
+      })
+      .select()
+      .single();
+      
+    if (messageError) throw messageError;
     
-    // Incrementar contador de mensagens
-    await supabase.rpc('increment_message_count', {
-      user_id_param: userId
-    });
-    
-    // Buscar histórico de mensagens para contexto
-    const { data: chatHistory } = await supabase
-      .from('chat_messages')
-      .select('role, content')
+    // Buscar check-ins emocionais recentes
+    const { data: recentCheckins } = await supabase
+      .from('emotion_checkins')
+      .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
-      .limit(10);
+      .limit(5);
+      
+    // Analisar a interação atual
+    const analysis = await analyzeInteraction(message, recentCheckins || []);
     
-    // Verificar se já tem plano ativo
-    const { data: existingPlan } = await supabase
-      .from('therapy_plans')
-      .select('id, title')
-      .eq('user_id', userId)
-      .eq('status', 'active')
-      .single();
+    // Salvar análise no banco
+    const { error: analysisError } = await supabase
+      .from('interaction_analyses')
+      .insert({
+        user_id: userId,
+        message_id: messageData.id,
+        cognitive_automatic_thoughts: analysis.cognitive.automaticThoughts,
+        cognitive_distortions: analysis.cognitive.cognitiveDistortions,
+        cognitive_core_beliefs: analysis.cognitive.coreBeliefs,
+        values_areas: analysis.values.valuedAreas,
+        values_conflicts: analysis.values.valueConflicts,
+        values_purpose_crisis: analysis.values.purposeCrisis,
+        emotional_intensity: analysis.emotional.emotionalIntensity,
+        emotional_coping_strategies: analysis.emotional.copingStrategies,
+        emotional_triggers: analysis.emotional.triggers,
+        behavioral_avoidance: analysis.behavioral.avoidancePatterns,
+        behavioral_functional: analysis.behavioral.functionalBehaviors,
+        behavioral_dysfunctional: analysis.behavioral.dysfunctionalBehaviors,
+        behavioral_context: analysis.behavioral.contextualFactors,
+        engagement_insight: analysis.engagement.insightLevel,
+        engagement_motivation: analysis.engagement.changeMotivation,
+        engagement_interventions: analysis.engagement.preferredInterventions
+      });
+      
+    if (analysisError) throw analysisError;
     
-    const userName = userProfile?.name || 'usuário';
-    const currentMessageCount = messageCount + 1;
+    // Buscar total de interações analisadas
+    const { count: interactionCount } = await supabase
+      .from('interaction_analyses')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
       
-    // Lógica de planos mais criteriosa
-    const shouldSuggestPlan = currentMessageCount >= 8 && !existingPlan && 
-                             chatHistory?.some(msg => 
-                               msg.role === 'user' && 
-                               (msg.content.toLowerCase().includes('ajuda') ||
-                                msg.content.toLowerCase().includes('melhorar') ||
-                                msg.content.toLowerCase().includes('mudar'))
-                             );
-    
-    // Sistema de prompts terapêuticos
-    let systemPrompt = `Você é a Lari, uma terapeuta digital especializada em TCC, ACT e DBT. 
-    Está conversando com ${userName}. Esta é a ${currentMessageCount}ª mensagem deles.
-    
-    IMPORTANTE: Seja uma terapeuta profissional, empática e científica.`;
-    
-    if (currentMessageCount <= 3) {
-      systemPrompt += `
-      
-      FASE DE RAPPORT (1-3 mensagens):
-      - Foque em construir confiança e compreensão
-      - Use validação empática
-      - Faça perguntas abertas para entender melhor
-      - NÃO proponha soluções ou planos ainda
-      - Use técnicas de escuta ativa`;
-      
-    } else if (currentMessageCount <= 6) {
-      systemPrompt += `
-      
-      FASE DE EXPLORAÇÃO (4-6 mensagens):
-      - Explore padrões e gatilhos
-      - Use técnicas de reestruturação cognitiva suave
-      - Identifique recursos e fortalezas do usuário
-      - Comece a normalizar experiências
-      - Ofereça técnicas pontuais quando apropriado`;
-      
-    } else if (shouldSuggestPlan) {
-      systemPrompt += `
-      
-      FASE DE INTERVENÇÃO (7+ mensagens):
-      - Agora você pode sugerir um plano estruturado
-      - Base a sugestão em padrões observados nas conversas
-      - Explique claramente os benefícios
-      - Seja específica sobre como funcionará`;
-      
-    } else {
-      systemPrompt += `
-      
-      FASE DE APROFUNDAMENTO (7+ mensagens):
-      - Continue explorando e oferecendo técnicas pontuais
-      - Use técnicas específicas de TCC, ACT ou DBT
-      - Ajude na conscientização de padrões
-      - Ofereça estratégias de enfrentamento`;
+    // Se atingiu 7 interações, fazer análise completa
+    let patterns: PatternAnalysis | null = null;
+    if (interactionCount && interactionCount >= 7) {
+      // Buscar todas as análises
+      const { data: allAnalyses } = await supabase
+        .from('interaction_analyses')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(7);
+        
+      if (allAnalyses) {
+        const analysisArray: InteractionAnalysis[] = allAnalyses.map(a => ({
+          cognitive: {
+            automaticThoughts: a.cognitive_automatic_thoughts || [],
+            cognitiveDistortions: a.cognitive_distortions || [],
+            coreBeliefs: a.cognitive_core_beliefs || []
+          },
+          values: {
+            valuedAreas: a.values_areas || [],
+            valueConflicts: a.values_conflicts || [],
+            purposeCrisis: a.values_purpose_crisis || false
+          },
+          emotional: {
+            emotionalIntensity: a.emotional_intensity || 1,
+            copingStrategies: a.emotional_coping_strategies || [],
+            triggers: a.emotional_triggers || []
+          },
+          behavioral: {
+            avoidancePatterns: a.behavioral_avoidance || [],
+            functionalBehaviors: a.behavioral_functional || [],
+            dysfunctionalBehaviors: a.behavioral_dysfunctional || [],
+            contextualFactors: a.behavioral_context || []
+          },
+          engagement: {
+            insightLevel: a.engagement_insight || 1,
+            changeMotivation: a.engagement_motivation || 1,
+            preferredInterventions: a.engagement_interventions || []
+          },
+          timestamp: new Date(a.created_at)
+        }));
+        
+        patterns = analyzeInteractionPatterns(analysisArray);
+      }
     }
     
-    systemPrompt += `
+    // Preparar o prompt baseado na análise
+    let systemPrompt = `Você é a Lari, uma terapeuta digital especializada em TCC, ACT, DBT e Logoterapia.
+    Está conversando com um usuário que demonstra:
+
+    ANÁLISE ATUAL:
+    Nível de Insight: ${analysis.engagement.insightLevel}/5
+    Motivação para Mudança: ${analysis.engagement.changeMotivation}/5
+    Intensidade Emocional: ${analysis.emotional.emotionalIntensity}/5
     
-    DIRETRIZES:
+    Distorções Cognitivas: ${analysis.cognitive.cognitiveDistortions.join(', ')}
+    Gatilhos Emocionais: ${analysis.emotional.triggers.join(', ')}
+    Áreas de Valor: ${analysis.values.valuedAreas.join(', ')}
+    
+    DIRETRIZES DE INTERVENÇÃO:
+
+    1. VALIDAÇÃO E ACOLHIMENTO:
     - Use validação emocional antes de qualquer intervenção
-    - Mantenha postura não julgmental
+    - Mantenha postura não julgamental
+    - Demonstre escuta ativa com paráfrases
+    - Adapte tom ao estado emocional atual
+
+    2. ABORDAGEM PRINCIPAL (escolha baseada no perfil):
+    - Se distorções cognitivas predominam → TCC
+      * Questione gentilmente pensamentos automáticos
+      * Proponha experimentos comportamentais simples
+    
+    - Se evitação experiencial/valores difusos → ACT
+      * Use metáforas para explicar conceitos
+      * Explore valores e ações comprometidas
+    
+    - Se desregulação emocional → DBT
+      * Ofereça técnicas TIPP se necessário
+      * Ensine habilidades de mindfulness
+    
+    - Se crise de sentido → Logoterapia
+      * Use questionamento socrático
+      * Conecte ações com propósito pessoal
+
+    3. INTERVENÇÕES PRÁTICAS:
     - Foque em forças e recursos do usuário
-    - Use linguagem calorosa mas profissional
-    - Responda sempre em português brasileiro`;
+    - Sugira exercícios curtos e mensuráveis
+    - Faça micro-psicoeducação quando relevante
+    - Proponha tarefas entre conversas realizáveis
+
+    4. MONITORAMENTO DE RISCO:
+    - Atenção a sinais de ideação suicida/autoagressão
+    - Protocolo de crise: validar, expressar preocupação, recomendar CVV (188)`;
+
+    if (patterns) {
+      systemPrompt += `
+      
+      ANÁLISE DE PADRÃO (7 interações):
+      Abordagem Recomendada: ${patterns.recommendedApproach}
+      Distorções Predominantes: ${patterns.predominantDistortions.join(', ')}
+      Gatilhos Comuns: ${patterns.commonTriggers.join(', ')}
+      Temas de Valor: ${patterns.valueThemes.join(', ')}
+      Padrões Comportamentais: ${patterns.behavioralPatterns.join(', ')}
+      
+      IMPORTANTE: 
+      - Considere sugerir um plano terapêutico estruturado
+      - Conecte intervenções aos temas de valor identificados
+      - Use exemplos dos padrões observados para psicoeducação
+      - Proponha exercícios específicos para os padrões identificados`;
+    }
     
     // Preparar mensagens para IA
     const messages = [
       { role: 'system', content: systemPrompt },
-      ...chatHistory?.reverse()?.slice(-8) || [],
+      ...history?.slice(-8) || [],
       { role: 'user', content: message }
     ];
     
@@ -236,7 +245,7 @@ export async function POST(req: Request) {
       });
       
     // Verificar se deve mostrar botão de criar plano
-    const shouldShowPlanButton = shouldSuggestPlan && 
+    const shouldShowPlanButton = patterns && 
                                  aiMessage.toLowerCase().includes('plano');
     
     console.log('✅ [CHAT] Processamento completo');
@@ -244,9 +253,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ 
       message: aiMessage,
       shouldShowPlanCreation: shouldShowPlanButton,
-      messageCount: currentMessageCount,
-      canCreatePlan: shouldSuggestPlan,
-      plan: userPlan
+      messageCount: interactionCount + 1,
+      canCreatePlan: patterns,
+      plan: 'free'
     });
     
   } catch (error: any) {

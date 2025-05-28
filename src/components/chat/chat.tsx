@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import PlanBanner from '@/components/PlanBanner';
 import { Button } from '@/components/ui/button';
 import { EmotionType } from '@/types/database';
+import { AnalysisProgress } from './AnalysisProgress';
 
 // Modal para alertar sobre limite de mensagens
 function UpgradeModal({ onClose, onUpgrade }: { onClose: () => void; onUpgrade: () => void }) {
@@ -149,6 +150,8 @@ export function Chat() {
   const [showEmotionCheckinModal, setShowEmotionCheckinModal] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [totalInteractions, setTotalInteractions] = useState(0);
+  const [canCreatePlan, setCanCreatePlan] = useState(false);
   
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -306,37 +309,37 @@ export function Chat() {
     return !limitReached;
   };
   
-  const handleSendMessage = async (content: string) => {
-    // Verificar se está autenticado
-    if (!userId) {
-      setAuthError('Sessão expirada. Redirecionando para login...');
-      setTimeout(() => router.push('/login'), 1500);
-      return;
-    }
-    
-    // Verificar limite antes de enviar
-    const canSend = await checkMessageLimitLocal();
-    if (!canSend) return;
-    
-    // Add user message
-    const userMessage: ChatMessage = {
-      id: uuidv4(),
-      content,
-      role: 'user',
-      createdAt: new Date()
+  useEffect(() => {
+    // Buscar total de interações analisadas
+    const fetchInteractionCount = async () => {
+      const supabase = createClientSupabaseClient();
+      const { count } = await supabase
+        .from('interaction_analyses')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId);
+        
+      setTotalInteractions(count || 0);
     };
     
-    setMessages(prev => [...prev, userMessage]);
-    setIsTyping(true);
-    
+    if (userId) {
+      fetchInteractionCount();
+    }
+  }, [userId]);
+  
+  const handleSendMessage = async (content: string) => {
     try {
-      // Incrementar contagem
-      const { success } = await incrementMessageCount();
-      if (success) {
-        setMessageCount(prev => prev + 1);
-      }
+      setAuthError(null);
       
-      // Send to API
+      const newMessage: ChatMessage = {
+        id: uuidv4(),
+        content,
+        role: 'user',
+        createdAt: new Date()
+      };
+      
+      setMessages(prev => [...prev, newMessage]);
+      setIsTyping(true);
+      
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -344,7 +347,6 @@ export function Chat() {
         },
         body: JSON.stringify({
           message: content,
-          userId: userId,
           history: messages.map(msg => ({
             role: msg.role,
             content: msg.content
@@ -352,41 +354,29 @@ export function Chat() {
         }),
       });
       
+      if (!response.ok) {
+        throw new Error('Falha ao enviar mensagem');
+      }
+      
       const data = await response.json();
       
-      // Verificar se há erro de autenticação
-      if (response.status === 401) {
-        setAuthError('Sessão expirada. Redirecionando para login...');
-        setTimeout(() => router.push('/login'), 1500);
-        return;
+      if (data.error) {
+        throw new Error(data.error);
       }
       
-      if (!response.ok) {
-        throw new Error(data.error || 'Falha ao obter resposta');
-      }
+      const aiMessage: ChatMessage = {
+        id: uuidv4(),
+        content: data.message,
+        role: 'assistant',
+        createdAt: new Date()
+      };
       
-      // Add AI response
-      setMessages(prev => [
-        ...prev, 
-        {
-          id: uuidv4(),
-          content: data.message,
-          role: 'assistant',
-          createdAt: new Date()
-        }
-      ]);
-    } catch (error) {
-      console.error('Erro ao processar mensagem:', error);
-      // Add error message
-      setMessages(prev => [
-        ...prev, 
-        {
-          id: uuidv4(),
-          content: 'Desculpe, tive um problema ao processar sua mensagem. Poderia tentar novamente?',
-          role: 'assistant',
-          createdAt: new Date()
-        }
-      ]);
+      setMessages(prev => [...prev, aiMessage]);
+      setTotalInteractions(prev => prev + 1);
+      setCanCreatePlan(data.canCreatePlan);
+      
+    } catch (error: any) {
+      setAuthError(error.message);
     } finally {
       setIsTyping(false);
     }
@@ -590,10 +580,17 @@ export function Chat() {
       
       {/* Input container */}
       <div className="border-t p-4">
-        <ChatInput 
-          onSend={handleSendMessage} 
-          disabled={!userId || isAuthenticating}
+        <AnalysisProgress
+          totalInteractions={totalInteractions}
+          canCreatePlan={canCreatePlan}
         />
+        
+        <div className="mt-4">
+          <ChatInput 
+            onSend={handleSendMessage} 
+            disabled={!userId || isAuthenticating}
+          />
+        </div>
       </div>
       
       {/* Modal de upgrade */}

@@ -84,28 +84,28 @@ export async function POST(request: Request) {
     // Criar preferência de pagamento
     const result = await preference.create({
       body: {
-      items: [
-        {
+        items: [
+          {
             id: planId,
             title: plan.title,
             description: plan.description,
             unit_price: plan.unit_price,
             quantity: plan.quantity,
             currency_id: 'BRL'
-        }
-      ],
-      payer: {
+          }
+        ],
+        payer: {
           name: profile?.name || user.email?.split('@')[0] || 'Usuário',
           email: profile?.email || user.email || '',
-      },
-      auto_return: 'approved',
-        back_urls: {
-          success: `${baseUrl}/app/payment/success`,
-          failure: `${baseUrl}/app/payment/failure`,
-          pending: `${baseUrl}/app/payment/pending`
         },
-        notification_url: `${baseUrl}/api/payments/webhook`,
-      metadata: {
+        auto_return: 'all',
+        back_urls: {
+          success: process.env.MERCADOPAGO_SUCCESS_URL || `${baseUrl}/app/payment/success`,
+          failure: process.env.MERCADOPAGO_FAILURE_URL || `${baseUrl}/app/payment/failure`,
+          pending: process.env.MERCADOPAGO_PENDING_URL || `${baseUrl}/app/payment/pending`
+        },
+        notification_url: process.env.MERCADOPAGO_WEBHOOK_URL || `${baseUrl}/api/payments/webhook`,
+        metadata: {
           user_id: user.id,
           plan_id: plan.plan_id
         }

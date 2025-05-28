@@ -1,137 +1,94 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createRouteClient } from '@/lib/supabase/server';
 import { MercadoPagoConfig, Payment } from 'mercadopago';
+import crypto from 'crypto';
 
 export async function POST(request: NextRequest) {
   try {
-    // Extrair dados da requisição
+    // Obter o corpo da requisição como texto
     const body = await request.json();
     
+    // Obter o cabeçalho de assinatura
+    const signature = request.headers.get('x-signature');
+    
+    // Validar a assinatura
+    if (process.env.MERCADOPAGO_WEBHOOK_SECRET) {
+      const generatedSignature = crypto.createHmac('sha256', process.env.MERCADOPAGO_WEBHOOK_SECRET)
+        .update(body)
+        .digest('hex');
+      
+      if (signature !== `${generatedSignature}`) {
+        console.error('Assinatura do webhook inválida');
+        return NextResponse.json({ error: 'Assinatura inválida' }, { status: 401 });
+      }
+    }
+    
+    // Parsear o corpo da requisição
+    const data = JSON.parse(body);
+    
     // Verificar se é uma notificação de pagamento
-    if (body.type !== 'payment') {
+    if (data.type !== 'payment') {
       return NextResponse.json({ message: 'Notificação não processada: não é um pagamento' }, { status: 200 });
     }
     
-    // Configurar cliente Mercado Pago
+    // Configurar cliente do Mercado Pago
     const client = new MercadoPagoConfig({ 
       accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN!
     });
     
-    // Buscar detalhes do pagamento
-    const paymentClient = new Payment(client);
-    const paymentData = await paymentClient.get({ id: body.data.id });
+    const payment = new Payment(client);
     
-    // Extrair informações relevantes
-    const paymentId = paymentData.id;
-    const status = paymentData.status;
-    const transaction_amount = paymentData.transaction_amount;
-    const userId = paymentData.metadata?.user_id;
-    const planId = paymentData.metadata?.plan_id;
+    // Obter detalhes do pagamento
+    const paymentData = await payment.get({ id: data.data.id });
     
-    if (!userId) {
-      console.error('User ID não encontrado nos metadados:', paymentData.metadata);
-      return NextResponse.json({ message: 'User ID não encontrado' }, { status: 400 });
+    // Inicializar cliente Supabase
+    const supabase = await createRouteClient();
+    
+    // Atualizar status do pagamento
+    const { error: updateError } = await supabase
+      .from('payment_attempts')
+      .update({
+        status: paymentData.status,
+        payment_id: paymentData.id,
+        updated_at: new Date().toISOString()
+      })
+      .eq('preference_id', paymentData.preference_id);
+      
+    if (updateError) {
+      console.error('Erro ao atualizar pagamento:', updateError);
+      return NextResponse.json(
+        { error: 'Erro ao processar notificação' },
+        { status: 500 }
+      );
     }
     
-    // Inicializar Supabase Admin para operações em nome do sistema
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-    
-    // Atualizar o status da tentativa de pagamento
-    if (userId) {
-      // Abordagem tipada com upsert para evitar problemas com o método .eq()
-      await supabase
-        .from('payment_attempts')
-        .upsert({
-          user_id: userId,
-          status: status,
-          payment_id: paymentId,
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id',
-          ignoreDuplicates: false
-        });
+    // Se o pagamento foi aprovado, atualizar o plano do usuário
+    if (paymentData.status === 'approved') {
+      const metadata = paymentData.metadata as { user_id: string; plan_id: string };
       
-      // Se o pagamento foi aprovado, atualizar a assinatura do usuário
-      if (status === 'approved') {
-        // Obter data atual
-        const currentDate = new Date();
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          plan: metadata.plan_id,
+          subscription_start_date: new Date().toISOString(),
+          subscription_end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 dias
+        })
+        .eq('id', metadata.user_id);
         
-        // Verificar se o usuário já tem uma assinatura ativa
-        const { data: existingSubscriptions } = await supabase
-          .from('subscriptions')
-          .select('*')
-          .match({ user_id: userId })
-          .order('created_at', { ascending: false })
-          .limit(1);
-        
-        const existingSubscription = existingSubscriptions?.[0];
-        
-        // Calcular nova data de término
-        let startDate = currentDate;
-        if (existingSubscription && new Date(existingSubscription.end_date) > currentDate) {
-          startDate = new Date(existingSubscription.end_date);
-        }
-        
-        // Adicionar 30 dias (ou mais se for plano anual)
-        const endDate = new Date(startDate);
-        const daysToAdd = planId && planId.includes('annual') ? 365 : 30;
-        endDate.setDate(endDate.getDate() + daysToAdd);
-        
-        // Criar ou atualizar assinatura
-        await supabase
-          .from('subscriptions')
-          .insert({
-            user_id: userId,
-            plan_id: planId || 'pro',
-            start_date: startDate.toISOString(),
-            end_date: endDate.toISOString(),
-            amount: transaction_amount,
-            status: 'active',
-            payment_id: paymentId
-          });
-        
-        // Atualizar plano no perfil do usuário
-        await supabase
-          .from('profiles')
-          .update({
-            plan: planId || 'pro',
-            updated_at: currentDate.toISOString()
-          })
-          .match({ id: userId });
-        
-        // Registrar em log
-        await supabase
-          .from('system_logs')
-          .insert({
-            event: 'plan_upgrade',
-            details: {
-              user_id: userId,
-              plan: planId || 'pro',
-              payment_id: paymentId,
-              amount: transaction_amount
-            }
-          });
+      if (profileError) {
+        console.error('Erro ao atualizar perfil:', profileError);
+        return NextResponse.json(
+          { error: 'Erro ao atualizar perfil' },
+          { status: 500 }
+        );
       }
     }
     
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Notificação processada com sucesso',
-      payment_id: paymentId,
-      status: status
-    });
-    
-  } catch (error: any) {
-    console.error('Erro ao processar notificação de pagamento:', error);
-    
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Erro ao processar webhook:', error);
     return NextResponse.json(
-      { 
-        error: 'Erro ao processar notificação', 
-        details: error.message 
-      },
+      { error: 'Erro interno ao processar webhook' },
       { status: 500 }
     );
   }

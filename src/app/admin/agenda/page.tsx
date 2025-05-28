@@ -16,10 +16,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function AdminAgendaPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [therapistId, setTherapistId] = useState<string | null>(null);
   const [isTherapist, setIsTherapist] = useState(false);
   const [slots, setSlots] = useState<Slot[]>([]);
@@ -230,6 +232,62 @@ export default function AdminAgendaPage() {
     }
   };
 
+  // Criar slots para o dia selecionado
+  const createSlots = async () => {
+    if (!selectedDate) return;
+
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const { data: therapistData, error: therapistError } = await supabase
+        .from('therapists')
+        .select('id')
+        .single();
+
+      if (therapistError) throw therapistError;
+
+      // Criar slots de 1 hora entre o horário inicial e final
+      const [startHour, startMinute] = startTime.split(':').map(Number);
+      const [endHour, endMinute] = endTime.split(':').map(Number);
+
+      const slots = [];
+      const currentDate = new Date(selectedDate);
+      currentDate.setHours(startHour, startMinute, 0, 0);
+
+      const endDate = new Date(selectedDate);
+      endDate.setHours(endHour, endMinute, 0, 0);
+
+      while (currentDate < endDate) {
+        const slotEnd = new Date(currentDate);
+        slotEnd.setHours(currentDate.getHours() + 1);
+
+        slots.push({
+          therapist_id: therapistData.id,
+          start_time: currentDate.toISOString(),
+          end_time: slotEnd.toISOString(),
+          status: 'available'
+        });
+
+        currentDate.setHours(currentDate.getHours() + 1);
+      }
+
+      const { error } = await supabase
+        .from('slots')
+        .insert(slots);
+
+      if (error) throw error;
+
+      setSuccess('Horários criados com sucesso!');
+      fetchSlots(therapistData.id);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!isTherapist && !loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -246,185 +304,106 @@ export default function AdminAgendaPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">Administração de Agenda</h1>
-      
-      {error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Erro</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-      
-      {loading ? (
-        <div className="text-center py-8">Carregando...</div>
-      ) : (
-        <Tabs defaultValue="create">
-          <TabsList className="mb-4">
-            <TabsTrigger value="create">Criar Horários</TabsTrigger>
-            <TabsTrigger value="manage">Gerenciar Agenda</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="create" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
+    <div className="container mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">Gerenciar Agenda</h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Selecionar Data</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              locale={ptBR}
+              className="rounded-md border"
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Definir Horários</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="date">Data</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start"
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {selectedDate ? (
-                          format(selectedDate, "d 'de' MMMM 'de' yyyy", { 
-                            locale: ptBR 
-                          })
-                        ) : (
-                          <span>Selecione uma data</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={setSelectedDate}
-                        initialFocus
-                        disabled={(date) => date < new Date()}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Label htmlFor="startTime">Horário Inicial</Label>
+                  <Input
+                    id="startTime"
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                  />
                 </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="startTime">Horário Inicial</Label>
-                    <Input
-                      id="startTime"
-                      type="time"
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="endTime">Horário Final</Label>
-                    <Input
-                      id="endTime"
-                      type="time"
-                      value={endTime}
-                      onChange={(e) => setEndTime(e.target.value)}
-                    />
-                  </div>
-                </div>
-                
                 <div className="space-y-2">
-                  <Label htmlFor="duration">Duração da Sessão</Label>
-                  <Select
-                    value={slotDuration}
-                    onValueChange={setSlotDuration}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a duração" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="30">30 minutos</SelectItem>
-                      <SelectItem value="45">45 minutos</SelectItem>
-                      <SelectItem value="60">60 minutos</SelectItem>
-                      <SelectItem value="90">90 minutos</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="endTime">Horário Final</Label>
+                  <Input
+                    id="endTime"
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                  />
                 </div>
-                
-                <Button 
-                  className="w-full" 
-                  onClick={createNewSlots}
-                  disabled={creatingSlots || !selectedDate}
+              </div>
+
+              <Button
+                onClick={createSlots}
+                disabled={loading || !selectedDate}
+                className="w-full"
+              >
+                {loading ? 'Criando...' : 'Criar Horários'}
+              </Button>
+
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {success && (
+                <Alert>
+                  <AlertDescription>{success}</AlertDescription>
+                </Alert>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Horários Disponíveis</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <p>Carregando...</p>
+          ) : slots.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {slots.map((slot) => (
+                <div
+                  key={slot.id}
+                  className="p-3 border rounded-md text-center"
                 >
-                  {creatingSlots ? 'Criando...' : 'Criar Horários'}
-                </Button>
-              </div>
-              
-              <div className="border p-4 rounded-lg">
-                <h3 className="font-medium mb-2">Instruções:</h3>
-                <ul className="list-disc pl-5 space-y-2 text-sm">
-                  <li>Selecione uma data futura para oferecer horários.</li>
-                  <li>Defina um horário inicial e final para o dia (ex: 9h às 17h).</li>
-                  <li>Escolha a duração de cada sessão (padrão: 60 minutos).</li>
-                  <li>O sistema criará automaticamente slots dentro do período escolhido.</li>
-                  <li>Slots já reservados não podem ser excluídos.</li>
-                </ul>
-              </div>
+                  <p className="font-medium">
+                    {format(new Date(slot.start_time), 'HH:mm')} - {format(new Date(slot.end_time), 'HH:mm')}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {slot.status === 'available' ? 'Disponível' : 'Reservado'}
+                  </p>
+                </div>
+              ))}
             </div>
-          </TabsContent>
-          
-          <TabsContent value="manage">
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-xl font-semibold mb-4">Horários Disponíveis</h2>
-                {Object.entries(slotsByStatusAndDate.free).length > 0 ? (
-                  <div className="space-y-4">
-                    {Object.entries(slotsByStatusAndDate.free).map(([date, dateSlots]) => (
-                      <div key={date} className="border rounded-lg p-4">
-                        <h3 className="font-semibold mb-2 capitalize">
-                          {formatDate(dateSlots[0].start_utc)}
-                        </h3>
-                        <div className="space-y-2">
-                          {dateSlots.map(slot => (
-                            <div key={slot.id} className="flex items-center justify-between">
-                              <div className="flex items-center">
-                                <Clock className="mr-2 h-4 w-4" />
-                                <span>{formatTime(slot.start_utc)} - {formatTime(slot.end_utc)}</span>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => deleteSlot(slot.id)}
-                              >
-                                <Trash className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground">Nenhum horário disponível.</p>
-                )}
-              </div>
-              
-              <div>
-                <h2 className="text-xl font-semibold mb-4">Horários Reservados</h2>
-                {Object.entries(slotsByStatusAndDate.booked).length > 0 ? (
-                  <div className="space-y-4">
-                    {Object.entries(slotsByStatusAndDate.booked).map(([date, dateSlots]) => (
-                      <div key={date} className="border rounded-lg p-4">
-                        <h3 className="font-semibold mb-2 capitalize">
-                          {formatDate(dateSlots[0].start_utc)}
-                        </h3>
-                        <div className="space-y-2">
-                          {dateSlots.map(slot => (
-                            <div key={slot.id} className="flex items-center">
-                              <Clock className="mr-2 h-4 w-4" />
-                              <span>{formatTime(slot.start_utc)} - {formatTime(slot.end_utc)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground">Nenhum horário reservado.</p>
-                )}
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-      )}
+          ) : (
+            <p className="text-center text-muted-foreground">
+              Nenhum horário disponível para esta data.
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 } 

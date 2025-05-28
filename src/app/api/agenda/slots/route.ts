@@ -40,21 +40,6 @@ export async function GET(req: Request) {
       );
     }
     
-    // Verificar se a assinatura está ativa
-    const { data: subscription, error: subscriptionError } = await supabase
-      .from('subscriptions')
-      .select('status')
-      .eq('user_id', userId)
-      .eq('plan', 'clinical')
-      .single();
-    
-    if (subscriptionError || !subscription || subscription.status !== 'active') {
-      return NextResponse.json(
-        { error: 'Sua assinatura do plano Premium Clínico está inativa. Reative para acessar esta funcionalidade.' },
-        { status: 403 }
-      );
-    }
-    
     // Obter mês atual e próximo mês
     const today = new Date();
     const currentMonth = today.getMonth();

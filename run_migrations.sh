@@ -1,15 +1,38 @@
 #!/bin/bash
 
-# Script para executar as migrações no banco de dados Supabase
+# Cores para output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
 
-echo "Iniciando migração de subscription_tier para plan..."
+# Função para executar uma migration
+run_migration() {
+    local file=$1
+    echo -e "${YELLOW}Executando migration: $file${NC}"
+    
+    # Executar a migration usando o cliente psql do Supabase
+    supabase db reset --db-url "$SUPABASE_DB_URL" < "$file"
+    
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✓ Migration executada com sucesso: $file${NC}"
+    else
+        echo -e "${RED}✗ Erro ao executar migration: $file${NC}"
+        exit 1
+    fi
+}
 
-# Executando primeira migração
-echo "Executando migração inicial..."
-PGPASSWORD=$SUPABASE_DB_PASSWORD psql -h $SUPABASE_DB_HOST -U $SUPABASE_DB_USER -d $SUPABASE_DB_NAME -f migrations/0001_initial.sql
+# Verificar se o diretório de migrations existe
+if [ ! -d "migrations" ]; then
+    echo -e "${RED}Diretório de migrations não encontrado${NC}"
+    exit 1
+fi
 
-# Executando migração de atualização de colunas
-echo "Executando migração para atualizar colunas..."
-PGPASSWORD=$SUPABASE_DB_PASSWORD psql -h $SUPABASE_DB_HOST -U $SUPABASE_DB_USER -d $SUPABASE_DB_NAME -f migrations/0002_update_profile_columns.sql
+# Executar todas as migrations em ordem alfabética
+for file in migrations/*.sql; do
+    if [ -f "$file" ]; then
+        run_migration "$file"
+    fi
+done
 
-echo "Migração concluída com sucesso!" 
+echo -e "${GREEN}Todas as migrations foram executadas com sucesso!${NC}" 
