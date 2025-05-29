@@ -88,7 +88,7 @@
   }
   
   .glass-effect {
-    @apply bg-white/80 dark:bg-background-secondary/80 backdrop-blur-md border border-white/20;
+    @apply bg-white/80 dark:bg-background-secondary backdrop-blur-md border border-white/20;
   }
   
   .metallic-text {
