@@ -1,3 +1,4 @@
+// Forçando alteração para garantir push e deploy correto na Vercel
 'use server';
 
 import { createServerClient } from '@supabase/ssr';
