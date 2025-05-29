@@ -72,7 +72,7 @@
 /* Estilos globais premium */
 @layer components {
   .premium-card {
-    @apply bg-white dark:bg-background-secondary rounded-lg shadow-premium border border-border/10 backdrop-blur-sm;
+    @apply bg-white dark:bg-background-secondary rounded-lg shadow-lg border border-border/10 backdrop-blur-sm;
   }
   
   .premium-button {
