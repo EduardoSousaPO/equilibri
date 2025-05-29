@@ -1,21 +1,22 @@
 "use client"
 
+import * as React from 'react'
 import { type HTMLAttributes } from "react"
 import { cn } from "@/lib/utils"
 
 interface PremiumCardProps extends HTMLAttributes<HTMLDivElement> {
   variant?: "default" | "metallic" | "glass"
   hover?: boolean
-  children?: React.ReactNode
+  children?: any
 }
 
-function PremiumCard({ 
+export function PremiumCard({ 
   className, 
   variant = "default", 
   hover = true,
   children,
   ...props 
-}: PremiumCardProps) {
+}: PremiumCardProps): JSX.Element {
   const baseStyles = "premium-card transition-all duration-300"
   const hoverStyles = hover ? "hover:shadow-lg hover:-translate-y-1" : ""
   
@@ -38,6 +39,4 @@ function PremiumCard({
       {children}
     </div>
   )
-}
-
-export { PremiumCard } 
+} 

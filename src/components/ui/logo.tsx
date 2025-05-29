@@ -1,17 +1,23 @@
 'use client'
 
-import React from 'react'
+import * as React from 'react'
 import Image from 'next/image'
 
 interface LogoProps {
   className?: string
   imageSize?: 'sm' | 'md' | 'lg' | 'xl'
+  showText?: boolean
+  textColor?: string
+  children?: any
 }
 
 export function EquilibriLogo({ 
   className = '', 
-  imageSize = 'md' 
-}: LogoProps) {
+  imageSize = 'md',
+  showText = false,
+  textColor,
+  children
+}: LogoProps): any {
   // Definindo tamanhos da imagem baseado no prop imageSize
   const sizes = {
     sm: { width: 60, height: 60 },
@@ -23,7 +29,7 @@ export function EquilibriLogo({
   const { width, height } = sizes[imageSize]
 
   return (
-    <div className={`${className}`}>
+    <div className={`${className} flex items-center`}>
       <div className="relative">
         <Image
           src="/images/logo_oficial_equilibri.jpg"
@@ -35,6 +41,10 @@ export function EquilibriLogo({
           quality={100} // Máxima qualidade de imagem
         />
       </div>
+      {showText && (
+        <span className={`ml-2 font-bold text-lg ${textColor ?? 'text-primary'}`}>Equilibri.IA</span>
+      )}
+      {children}
     </div>
   )
 } 

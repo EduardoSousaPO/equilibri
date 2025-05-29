@@ -34,16 +34,20 @@ export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeVariants> {
   onClick?: () => void;
+  children?: any;
 }
 
 function Badge({
   className,
   variant,
   onClick,
+  children,
   ...props
 }: BadgeProps) {
   return (
-    <div className={cn(badgeVariants({ variant }), className)} onClick={onClick} {...props} />
+    <div className={cn(badgeVariants({ variant }), className)} onClick={onClick} {...props}>
+      {children}
+    </div>
   )
 }
 

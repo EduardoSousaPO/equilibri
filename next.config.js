@@ -10,9 +10,6 @@ const nextConfig = {
     // Desabilitar a verificação de tipos para o Typescript durante o build
     ignoreBuildErrors: true,
   },
-  experimental: {
-    serverActions: true,
-  },
   webpack: (config) => {
     // Resolver problema com mercadopago
     config.resolve.fallback = { 

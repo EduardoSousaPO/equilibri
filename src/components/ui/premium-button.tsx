@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from 'react'
 import { type HTMLAttributes } from "react"
 import { cn } from "@/lib/utils"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -32,12 +33,12 @@ const buttonVariants = cva(
 interface ButtonProps extends HTMLAttributes<HTMLButtonElement> {
   variant?: "default" | "metallic" | "glass" | "outline" | "ghost"
   size?: "default" | "sm" | "lg" | "icon"
-  children?: React.ReactNode
+  children?: any
   type?: "button" | "submit" | "reset"
   disabled?: boolean
 }
 
-function PremiumButton({ 
+export function PremiumButton({ 
   className, 
   variant = "default", 
   size = "default",
@@ -45,7 +46,7 @@ function PremiumButton({
   type = "button",
   disabled = false,
   ...props 
-}: ButtonProps) {
+}: ButtonProps): JSX.Element {
   return (
     <button
       type={type}
@@ -58,4 +59,4 @@ function PremiumButton({
   )
 }
 
-export { PremiumButton, buttonVariants } 
+export { buttonVariants } 

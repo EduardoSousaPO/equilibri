@@ -16,6 +16,7 @@
     "incremental": true,
     "noImplicitAny": false,
     "strictNullChecks": true,
+    "types": ["react", "react-dom", "node"],
     "plugins": [
       {
         "name": "next"
