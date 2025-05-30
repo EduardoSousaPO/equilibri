@@ -58,6 +58,17 @@ export async function POST(req: Request) {
     // Analisar a interação atual
     const analysis = await analyzeInteraction(message, recentCheckins || []);
     
+    // Garantir que emotional_coping_strategies seja sempre array
+    let copingStrategies = analysis.emotional.copingStrategies;
+    if (!Array.isArray(copingStrategies)) {
+      copingStrategies = [];
+    }
+
+    // Garantir que emotional_intensity seja inteiro entre 1 e 5
+    let emotionalIntensity = Number(analysis.emotional.emotionalIntensity);
+    if (isNaN(emotionalIntensity) || emotionalIntensity < 1) emotionalIntensity = 1;
+    if (emotionalIntensity > 5) emotionalIntensity = 5;
+
     // Salvar análise no banco
     const { error: analysisError } = await supabase
       .from('interaction_analyses')
@@ -70,8 +81,8 @@ export async function POST(req: Request) {
         values_areas: analysis.values.valuedAreas,
         values_conflicts: analysis.values.valueConflicts,
         values_purpose_crisis: analysis.values.purposeCrisis,
-        emotional_intensity: analysis.emotional.emotionalIntensity,
-        emotional_coping_strategies: analysis.emotional.copingStrategies,
+        emotional_intensity: emotionalIntensity,
+        emotional_coping_strategies: copingStrategies,
         emotional_triggers: analysis.emotional.triggers,
         behavioral_avoidance: analysis.behavioral.avoidancePatterns,
         behavioral_functional: analysis.behavioral.functionalBehaviors,
