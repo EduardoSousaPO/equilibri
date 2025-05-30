@@ -7,7 +7,6 @@ import { redirect } from 'next/navigation';
 
 export async function loginTestUser() {
   const cookieStore = cookies();
-  
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -21,57 +20,15 @@ export async function loginTestUser() {
         },
         remove(name: string, options: any) {
           cookieStore.set({ name, value: '', ...options });
-        },
-      },
+        }
+      }
     }
   );
-
-  try {
-    // Tentar login com usuário existente
-    const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-      email: 'teste@gmail.com',
-      password: 'password123'
-    });
-
-    if (loginData.user && !loginError) {
-      // Verificar se perfil existe
-      await ensureUserProfile(supabase, loginData.user.id, loginData.user.email || 'teste@gmail.com');
-      return { success: true, user: loginData.user };
-    }
-
-    // Se não conseguir login, criar novo usuário
-    if (loginError?.message.includes('Invalid login credentials')) {
-      const timestamp = Date.now();
-      const uniqueEmail = `teste.${timestamp}@gmail.com`;
-      
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: uniqueEmail,
-        password: 'password123',
-        options: {
-          emailRedirectTo: undefined,
-          data: {
-            full_name: 'Usuário Teste',
-            is_test_account: true,
-          }
-        }
-      });
-
-      if (signUpError) {
-        throw signUpError;
-      }
-
-      if (signUpData.user && signUpData.session) {
-        await createUserProfile(supabase, signUpData.user.id, uniqueEmail);
-        return { success: true, user: signUpData.user };
-      }
-    }
-
-    throw loginError || new Error('Falha na autenticação');
-
-  } catch (error: any) {
-    console.error('Erro no login:', error);
-    return { success: false, error: error.message };
-  }
+  const { error } = await supabase.auth.signInWithPassword({
+    email: process.env.TEST_EMAIL!,
+    password: process.env.TEST_PASSWORD!
+  });
+  if (error) throw error;
 }
 
 async function createUserProfile(supabase: any, userId: string, email: string) {
@@ -85,7 +42,6 @@ async function createUserProfile(supabase: any, userId: string, email: string) {
         plan: 'premium',
         created_at: new Date().toISOString()
       });
-
     if (error && !error.message.includes('duplicate key')) {
       console.error('Erro ao criar perfil:', error);
     }
@@ -101,7 +57,6 @@ async function ensureUserProfile(supabase: any, userId: string, email: string) {
       .select('id')
       .eq('id', userId)
       .single();
-
     if (!existingProfile) {
       await createUserProfile(supabase, userId, email);
     }
@@ -112,7 +67,6 @@ async function ensureUserProfile(supabase: any, userId: string, email: string) {
 
 export async function checkAuthStatus() {
   const cookieStore = cookies();
-  
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -126,23 +80,17 @@ export async function checkAuthStatus() {
         },
         remove(name: string, options: any) {
           cookieStore.set({ name, value: '', ...options });
-        },
-      },
+        }
+      }
     }
   );
-
-  const { data: { session } } = await supabase.auth.getSession();
-  
-  if (session) {
-    return { authenticated: true, user: session.user };
-  }
-  
-  return { authenticated: false };
+  const { data, error } = await supabase.auth.getUser();
+  if (error) throw error;
+  return data;
 }
 
 export async function logoutUser() {
   const cookieStore = cookies();
-  
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -156,11 +104,10 @@ export async function logoutUser() {
         },
         remove(name: string, options: any) {
           cookieStore.set({ name, value: '', ...options });
-        },
-      },
+        }
+      }
     }
   );
-
-  await supabase.auth.signOut();
-  return { success: true };
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
 } 
