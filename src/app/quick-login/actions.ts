@@ -5,9 +5,9 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-export async function loginTestUser() {
+function getSupabase() {
   const cookieStore = cookies();
-  const supabase = createServerClient(
+  return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -24,11 +24,33 @@ export async function loginTestUser() {
       }
     }
   );
+}
+
+/** Faz login do usuário de testes e redireciona */
+export async function loginTestUser() {
+  const supabase = getSupabase();
   const { error } = await supabase.auth.signInWithPassword({
     email: process.env.TEST_EMAIL!,
-    password: process.env.TEST_PASSWORD!
+    password: process.env.TEST_PASSWORD!,
   });
-  if (error) throw error;
+  if (error) throw new Error(error.message);
+  redirect('/');
+}
+
+/** Apenas consulta sessão e devolve um boolean */
+export async function checkAuthStatus() {
+  const supabase = getSupabase();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  return !!session;
+}
+
+/** Sai da conta corrente */
+export async function logoutUser() {
+  const supabase = getSupabase();
+  await supabase.auth.signOut();
+  redirect('/login');
 }
 
 async function createUserProfile(supabase: any, userId: string, email: string) {
@@ -63,51 +85,4 @@ async function ensureUserProfile(supabase: any, userId: string, email: string) {
   } catch (error) {
     console.error('Erro ao verificar perfil:', error);
   }
-}
-
-export async function checkAuthStatus() {
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-        set(name: string, value: string, options: any) {
-          cookieStore.set({ name, value, ...options });
-        },
-        remove(name: string, options: any) {
-          cookieStore.set({ name, value: '', ...options });
-        }
-      }
-    }
-  );
-  const { data, error } = await supabase.auth.getUser();
-  if (error) throw error;
-  return data;
-}
-
-export async function logoutUser() {
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-        set(name: string, value: string, options: any) {
-          cookieStore.set({ name, value, ...options });
-        },
-        remove(name: string, options: any) {
-          cookieStore.set({ name, value: '', ...options });
-        }
-      }
-    }
-  );
-  const { error } = await supabase.auth.signOut();
-  if (error) throw error;
 } 
