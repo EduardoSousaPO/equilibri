@@ -459,4 +459,8 @@ export function analyzeInteractionPatterns(analyses: InteractionAnalysis[]): {
       .map(([b]) => b),
     recommendedApproach
   };
-} 
+}
+
+// Exporta com alias para compatibilidade com as rotas da API
+export { analyzeUserNeedsFromMessages as analyzeUserNeedsFromChat };
+export { createBasicPlan as createTherapyPlan }; 
