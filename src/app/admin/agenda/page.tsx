@@ -162,7 +162,7 @@ export default function AdminAgendaPage() {
       
       // Criar array de slots
       const duration = parseInt(slotDuration, 10);
-      const slots = [];
+      const slots: { therapist_id: string; start_utc: string; end_utc: string; status: string; }[] = [];
       let currentTime = new Date(startDateTime);
       
       while (currentTime < endDateTime) {
@@ -252,7 +252,7 @@ export default function AdminAgendaPage() {
       const [startHour, startMinute] = startTime.split(':').map(Number);
       const [endHour, endMinute] = endTime.split(':').map(Number);
 
-      const slots = [];
+      const slots: { therapist_id: string; start_time: string; end_time: string; status: string; }[] = [];
       const currentDate = new Date(selectedDate);
       currentDate.setHours(startHour, startMinute, 0, 0);
 
@@ -389,10 +389,10 @@ export default function AdminAgendaPage() {
                   className="p-3 border rounded-md text-center"
                 >
                   <p className="font-medium">
-                    {format(new Date(slot.start_time), 'HH:mm')} - {format(new Date(slot.end_time), 'HH:mm')}
+                    {format(new Date(slot.start_utc), 'HH:mm')} - {format(new Date(slot.end_utc), 'HH:mm')}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {slot.status === 'available' ? 'Disponível' : 'Reservado'}
+                    {slot.status === 'free' ? 'Disponível' : 'Reservado'}
                   </p>
                 </div>
               ))}
