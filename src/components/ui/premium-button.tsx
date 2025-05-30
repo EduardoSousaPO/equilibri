@@ -11,8 +11,6 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "premium-button",
-        metallic: "bg-metallic-gold text-foreground shadow-metallic hover:shadow-lg hover:-translate-y-0.5",
-        glass: "glass-effect text-foreground hover:bg-white/90 dark:hover:bg-background-secondary/90",
         outline: "border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground",
         ghost: "hover:bg-accent/10 text-accent hover:text-accent-light",
       },
@@ -31,7 +29,7 @@ const buttonVariants = cva(
 )
 
 interface ButtonProps extends HTMLAttributes<HTMLButtonElement> {
-  variant?: "default" | "metallic" | "glass" | "outline" | "ghost"
+  variant?: "default" | "outline" | "ghost"
   size?: "default" | "sm" | "lg" | "icon"
   children?: any
   type?: "button" | "submit" | "reset"

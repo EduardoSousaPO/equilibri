@@ -23,10 +23,6 @@
     --background-secondary: #F7FAFC;
     --foreground: #1A202C;
     
-    /* Cores metálicas */
-    --metallic-gold: linear-gradient(135deg, #D4AF37 0%, #FFF1C1 50%, #D4AF37 100%);
-    --metallic-silver: linear-gradient(135deg, #C0C0C0 0%, #FFFFFF 50%, #C0C0C0 100%);
-    
     /* Sombras sofisticadas */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow: 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -72,7 +68,7 @@
 /* Estilos globais premium */
 @layer components {
   .premium-card {
-    @apply bg-white dark:bg-background-secondary rounded-lg shadow-lg border border-border backdrop-blur-sm;
+    @apply bg-white dark:bg-background-secondary rounded-lg shadow border border-border;
   }
   
   .premium-button {
@@ -85,14 +81,6 @@
   
   .premium-heading {
     @apply text-foreground font-display font-semibold tracking-tight;
-  }
-  
-  .glass-effect {
-    @apply bg-white/80 dark:bg-background-secondary backdrop-blur-md border border-white/20;
-  }
-  
-  .metallic-text {
-    @apply bg-clip-text text-transparent bg-metallic-gold;
   }
 }
 

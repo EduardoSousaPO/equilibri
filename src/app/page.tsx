@@ -12,10 +12,10 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <WhatsAppButton>{null}</WhatsAppButton>
-      {/* Banner da nova funcionalidade com efeito de vidro */}
-      <div className="glass-effect backdrop-blur-sm border-b border-white/10 text-foreground p-3 text-center">
+      {/* Banner da nova funcionalidade */}
+      <div className="border-b border-white/10 text-foreground p-3 text-center">
         <p className="font-medium">
-          🎉 <span className="font-bold metallic-text">Novidade:</span> Conheça Lari, sua nova terapeuta digital! <a href="/login?redirect=chat" className="text-primary hover:text-primary-light transition-colors font-semibold">Faça login para conversar</a>
+          🎉 <span className="font-bold">Novidade:</span> Conheça Lari, sua nova terapeuta digital! <a href="/login?redirect=chat" className="text-primary hover:text-primary-light transition-colors font-semibold">Faça login para conversar</a>
         </p>
       </div>
       
@@ -63,21 +63,21 @@ export default function HomePage() {
               </div>
               <h1 className="premium-heading text-4xl sm:text-5xl lg:text-6xl mb-6">
                 Seu Companheiro Terapêutico<br/>
-                <span className="metallic-text">Inteligente</span>
+                <span className="font-bold">Inteligente</span>
               </h1>
               <p className="mt-6 max-w-2xl mx-auto text-xl text-text-primary">
                 Converse com a Lari, nossa IA terapêutica que entende suas emoções e oferece suporte personalizado baseado em evidências científicas.
               </p>
               <div className="mt-10 flex justify-center gap-4">
                 <Link href="/register" passHref legacyBehavior>
-                  <button type="button" className="h-12 px-8 rounded-lg text-base font-medium bg-metallic-gold text-foreground shadow-metallic hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                  <PremiumButton size="lg" className="w-auto">
                     Começar agora
-                  </button>
+                  </PremiumButton>
                 </Link>
                 <Link href="/login?redirect=chat" passHref legacyBehavior>
-                  <button type="button" className="h-12 px-8 rounded-lg text-base font-medium glass-effect text-foreground hover:bg-white/90 dark:hover:bg-background-secondary/90 transition-all">
+                  <PremiumButton size="lg" variant="outline" className="w-auto">
                     Converse com Lari
-                  </button>
+                  </PremiumButton>
                 </Link>
               </div>
             </div>
@@ -134,17 +134,14 @@ export default function HomePage() {
                 </ul>
                 <div className="mt-8">
                   <Link href="/login?redirect=chat" passHref legacyBehavior>
-                    <button type="button" className="h-12 px-8 rounded-lg text-base font-medium bg-metallic-gold text-foreground shadow-metallic hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center">
+                    <PremiumButton size="lg" className="w-full">
                       Conversar com Lari
-                      <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 -mr-1 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </button>
+                    </PremiumButton>
                   </Link>
                 </div>
               </div>
               <div className="lg:w-5/12">
-                <div className="premium-card glass-effect p-6 max-w-md mx-auto lg:mx-0 rounded-lg shadow-sm border border-border">
+                <div className="premium-card p-6 max-w-md mx-auto lg:mx-0 rounded-lg shadow-sm border border-border">
                   <div className="flex items-center mb-4">
                     <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
                       <span className="text-primary text-xl font-medium">L</span>
@@ -160,7 +157,7 @@ export default function HomePage() {
                         Olá! Sou Lari, sua terapeuta virtual. Estou aqui para conversar sobre suas emoções, ajudar com técnicas terapêuticas e acompanhar seu progresso emocional. Como está se sentindo hoje?
                       </p>
                     </div>
-                    <div className="premium-card p-4 ml-auto mr-4 max-w-[80%] rounded-lg shadow-sm bg-metallic-gold/10 border border-gold-500/20">
+                    <div className="premium-card p-4 ml-auto mr-4 max-w-[80%] rounded-lg shadow-sm bg-white border border-border">
                       <p className="text-text-primary text-sm">
                         Estou me sentindo um pouco ansioso hoje.
                       </p>
@@ -199,7 +196,7 @@ export default function HomePage() {
             <h2 className="text-base font-semibold text-primary tracking-wide uppercase">FUNCIONALIDADES</h2>
             <p className="mt-2 text-3xl font-display font-bold text-foreground sm:text-4xl">
               Uma nova abordagem para o<br/>
-              <span className="metallic-text">bem-estar emocional</span>
+              <span className="font-bold">bem-estar emocional</span>
             </p>
             <p className="mt-4 max-w-2xl mx-auto text-xl text-text-primary">
               Combinamos tecnologia avançada com práticas terapêuticas cientificamente validadas.
@@ -209,7 +206,7 @@ export default function HomePage() {
             <div className="mt-16">
               <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-2">
                 {/* Feature Cards */}
-                <div className="premium-card glass-effect p-6 hover:transform hover:-translate-y-1 transition-all duration-300 rounded-lg shadow-sm border border-border">
+                <div className="premium-card p-6 rounded-lg shadow-sm border border-border">
                   <div className="w-12 h-12 rounded-md flex items-center justify-center bg-primary/10 text-primary mb-4">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 01-.923 1.785A5.969 5.969 0 006 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337z" />
@@ -524,7 +521,7 @@ export default function HomePage() {
                   <span className="text-5xl font-bold text-primary">R$ 0</span>
                   <span className="text-text-secondary">/para sempre</span>
                 </p>
-                <button type="button" className="h-10 px-4 py-2 border-2 border-primary text-primary rounded-md hover:bg-primary hover:text-primary-foreground transition-all">
+                <button type="button" className="premium-button h-10 px-4 py-2 w-full">
                   Começar Grátis
                 </button>
               </div>
@@ -576,7 +573,7 @@ export default function HomePage() {
                     <span className="text-5xl font-bold text-primary">R$ 39,90</span>
                     <span className="text-text-secondary">/por mês</span>
                   </p>
-                  <button type="button" className="mt-8 w-full h-10 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/80 text-base font-medium transition-all">
+                  <button type="button" className="premium-button mt-8 w-full h-10 px-4 py-2 text-base font-medium">
                     Começar 14 dias Grátis
                   </button>
                   <p className="mt-2 text-center text-xs text-text-secondary">
@@ -637,7 +634,7 @@ export default function HomePage() {
                     <span className="text-5xl font-bold text-primary">R$ 179,00</span>
                     <span className="text-text-secondary">/por mês</span>
                   </p>
-                  <button type="button" className="mt-8 w-full h-10 px-4 py-2 rounded-md bg-brand text-white hover:bg-brand/90 text-base font-medium transition-all">
+                  <button type="button" className="premium-button mt-8 w-full h-10 px-4 py-2 text-base font-medium bg-brand text-white hover:bg-brand/90">
                     Começar 7 dias Grátis
                   </button>
                   <p className="mt-2 text-center text-xs text-text-secondary">
